@@ -16,15 +16,15 @@ resource "aws_apigatewayv2_stage" "default" {
     name        = local.api_stage_name
     auto_deploy = true
 
-    default_route_settings {
-        logging_level          = "ERROR"
-        throttling_burst_limit = 100
-        throttling_rate_limit  = 100
-    }
-    access_log_settings {
-        destination_arn = aws_cloudwatch_log_group.api_access_log.arn
-        format          = "{ \"requestId\":\"$context.requestId\", \"extendedRequestId\":\"$context.extendedRequestId\", \"ip\": \"$context.identity.sourceIp\", \"caller\":\"$context.identity.caller\", \"user\":\"$context.identity.user\", \"requestTime\":\"$context.requestTime\", \"httpMethod\":\"$context.httpMethod\", \"resourcePath\":\"$context.resourcePath\", \"status\":\"$context.status\", \"protocol\":\"$context.protocol\",  \"responseLength\":\"$context.responseLength\", \"authorizerError\":\"$context.authorizer.error\", \"authorizerStatus\":\"$context.authorizer.status\", \"requestIsValid\":\"$context.authorizer.is_valid\"\"environment\":\"$context.authorizer.environment\"}"
-    }
+  default_route_settings {
+    logging_level          = "ERROR"
+    throttling_burst_limit = 100
+    throttling_rate_limit  = 100
+  }
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_access_log.arn
+    format          = "{ \"requestId\":\"$context.requestId\", \"extendedRequestId\":\"$context.extendedRequestId\", \"ip\": \"$context.identity.sourceIp\", \"caller\":\"$context.identity.caller\", \"user\":\"$context.identity.user\", \"requestTime\":\"$context.requestTime\", \"httpMethod\":\"$context.httpMethod\", \"resourcePath\":\"$context.resourcePath\", \"status\":\"$context.status\", \"protocol\":\"$context.protocol\",  \"responseLength\":\"$context.responseLength\", \"authorizerError\":\"$context.authorizer.error\", \"authorizerStatus\":\"$context.authorizer.status\", \"requestIsValid\":\"$context.authorizer.is_valid\"\"environment\":\"$context.authorizer.environment\" }"
+  }
 
     # Bug in terraform-aws-provider with perpetual diff
     lifecycle {
@@ -35,14 +35,19 @@ resource "aws_apigatewayv2_stage" "default" {
 resource "aws_apigatewayv2_domain_name" "service_api_domain_name" {
     domain_name = var.api_domain_name
 
-    domain_name_configuration {
-        certificate_arn = aws_acm_certificate.service_certificate.arn
-        endpoint_type   = "REGIONAL"
-        security_policy = "TLS_1_2"
-    }
-    tags = {
-        Name = "${var.prefix}-api-domain-name"
-    }
+
+  domain_name_configuration {
+    certificate_arn = aws_acm_certificate.service_certificate.arn
+    endpoint_type   = "REGIONAL"
+    security_policy = "TLS_1_2"
+  }
+  mutual_tls_authentication {
+    truststore_uri = "s3://${aws_s3_bucket.truststore_bucket.bucket}/${local.truststore_file_name}"
+  }
+  tags = {
+    Name = "${var.prefix}-api-domain-name"
+  }
+
 }
 resource "aws_apigatewayv2_api_mapping" "api_mapping" {
     api_id      = aws_apigatewayv2_api.service_api.id
