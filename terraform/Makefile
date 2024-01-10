@@ -57,5 +57,9 @@ catch-all-zip:
 	chmod +x ./deploy.sh && \
 	./deploy.sh
 
+# This is useful for running any other Terraform commands with the correct variables.
+# E.g. `make tf-show`.
+# To allow further parameters you have to enclose it in quotes.
+# E.g. `make tf-'apply -replace="aws_dynamodb_table.test-dynamodb-table"'`.
 tf-%:
 	$(tf_cmd) $*
