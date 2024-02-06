@@ -64,11 +64,13 @@ info:
     - supporting measuring the overall success of a vaccination campaign to help inform the success of the [NHS Vaccination Strategy](https://www.england.nhs.uk/long-read/nhs-vaccination-strategy/)
   
     ## API status and roadmap
-    This API is [in development](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#statuses).
+    This API is [in development](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#statuses). It is subject to regular change and update to recieve feedback on the API design by the users of the services it replaces and input from [Clinical Safety](https://digital.nhs.uk/services/clinical-safety).
      
     To see our roadmap, or to suggest, comment or vote on features for this API, see our [interactive product backlog](https://nhs-digital-api-management.featureupvote.com/?tag=immunisation).
      
     If you have any other queries, [contact us](https://digital.nhs.uk/developer/help-and-support).
+
+    This API is still in development and has not yet undergone a [Clinical Safety](https://digital.nhs.uk/services/clinical-safety) review.
      
     ## Service level
     This API will be a platinum service, meaning it is operational and supported 24 x 7 x 365.
@@ -244,7 +246,7 @@ paths:
         If no records match the specified criteria for the search an empty response will be returned.
         
         The records returned in response to a search will not include sensitive data items as follows:
-		    - Personally identifiable details of the administering indervidual
+        - Personally identifiable details of the administering indervidual
 
         The behaviour of this endpoint depends on which access mode you are using:
 
@@ -288,7 +290,7 @@ paths:
         ## Overview
         This endpoint allows you to retrieve the record of a single vaccination by its ID.
 
- 		    If you have not stored the ID against your vaccination events, you may obtain the ID by first searching for a patient to return details of the immunisation records they have.
+        If you have not stored the ID against your vaccination events, you may obtain the ID by first searching for a patient to return details of the immunisation records they have.
 
         ## Sandbox testing
         You can test the following scenarios in our sandbox environment:
@@ -362,6 +364,11 @@ paths:
       description: |
         ## Overview
         
+        This endpoint allows you to delete an immunisation event record.
+        
+        You MUST ensure you have the correct ID for the record you wish to delete and only attempt to delete a record which you have appropriate responsibility for.
+
+        A successful request will result in a logical deletion of the record making it unavailable to future access via these endpoints but it will be retained in audit logs.
         ## Sandbox testing
         You can test the following scenarios in our sandbox environment:
 
