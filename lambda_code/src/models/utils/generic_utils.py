@@ -163,3 +163,20 @@ def get_deep_attr(obj, attrs):
     for attr in attrs.split("."):
         obj = getattr(obj, attr)
     return obj
+
+class Validator_error_list:
+    def __init__(self) -> None:
+        self.validation_errors = []
+        
+    def append_validation_errors(self, error):
+        """append validation errors"""
+        self.validation_errors.append(str(error))
+        print(self.validation_errors)
+    
+    def get_validation_errors(self):
+        """Return the validation errors list."""
+        return self.validation_errors
+
+    def clear_validation_errors(self):
+        """Clear the validation errors list."""
+        self.validation_errors = []

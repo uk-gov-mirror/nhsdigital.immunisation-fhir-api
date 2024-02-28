@@ -5,6 +5,7 @@ from models.utils.generic_utils import (
     get_generic_extension_value,
     generate_field_location_for_questionnnaire_response,
     generate_field_location_for_extension,
+    Validator_error_list
 )
 from models.utils.pre_validator_utils import PreValidation
 from models.constants import Constants
@@ -22,6 +23,9 @@ class FHIRImmunizationPreValidators:
         """
         Pre-validate that, if contained exists, then  each resourceType is unique
         """
+        
+        cls.validator_error_list = Validator_error_list()
+        
         try:
             contained = values["contained"]
             PreValidation.for_unique_list(
@@ -29,9 +33,13 @@ class FHIRImmunizationPreValidators:
                 "resourceType",
                 "contained[?(@.resourceType=='FIELD_TO_REPLACE')]",
             )
-
-        except KeyError:
-            pass
+            
+        except (ValueError, KeyError) as error:
+            if isinstance(error, ValueError):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -52,6 +60,9 @@ class FHIRImmunizationPreValidators:
         if not (
             isinstance(patient_reference, str) and patient_reference.startswith("#")
         ):
+            cls.validator_error_list.append_validation_errors(ValueError(
+                "patient.reference must be a single reference to a contained Patient resource"
+            ))
             raise ValueError(
                 "patient.reference must be a single reference to a contained Patient resource"
             )
@@ -68,19 +79,26 @@ class FHIRImmunizationPreValidators:
 
                 # If the reference is not equal to the ID then raise an error
                 if ("#" + contained_patient_id) != patient_reference:
-                    raise ValueError(
+                    value_error = ValueError(
                         f"The reference '{patient_reference}' does "
                         + "not exist in the contained Patient resource"
                     )
+                    cls.validator_error_list.append_validation_errors(value_error)
+                    raise value_error
             except KeyError as error:
                 # If the contained Patient resource has no id raise an error
-                raise ValueError(
+                value_error = ValueError(
                     "The contained Patient resource must have an 'id' field"
-                ) from error
+                )
+                cls.validator_error_list.append_validation_errors(value_error) 
+                raise value_error
 
         except (IndexError, KeyError) as error:
             # Entering this exception block implies that there is no contained patient resource
             # therefore raise an error
+            cls.validator_error_list.append_validation_errors(ValueError(
+                "contained[?(@.resourceType=='Patient')] is mandatory"
+            ))
             raise ValueError(
                 "contained[?(@.resourceType=='Patient')] is mandatory"
             ) from error
@@ -102,8 +120,13 @@ class FHIRImmunizationPreValidators:
                 "contained[?(@.resourceType=='Patient')].identifier",
                 defined_length=1,
             )
-        except (KeyError, IndexError):
-            pass
+            
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -125,8 +148,12 @@ class FHIRImmunizationPreValidators:
                 defined_length=10,
                 spaces_allowed=False,
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -145,8 +172,12 @@ class FHIRImmunizationPreValidators:
                 "contained[?(@.resourceType=='Patient')].name",
                 defined_length=1,
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -167,8 +198,12 @@ class FHIRImmunizationPreValidators:
                 defined_length=1,
                 elements_are_strings=True,
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -187,8 +222,12 @@ class FHIRImmunizationPreValidators:
                 patient_name_family,
                 "contained[?(@.resourceType=='Patient')].name[0].family",
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, KeyError, IndexError) as error:
+            if isinstance(error, ValueError):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -206,8 +245,12 @@ class FHIRImmunizationPreValidators:
             PreValidation.for_date(
                 patient_birth_date, "contained[?(@.resourceType=='Patient')].birthDate"
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -227,8 +270,12 @@ class FHIRImmunizationPreValidators:
                 "contained[?(@.resourceType=='Patient')].gender",
                 predefined_values=Constants.GENDERS,
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -247,8 +294,12 @@ class FHIRImmunizationPreValidators:
                 "contained[?(@.resourceType=='Patient')].address",
                 defined_length=1,
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -269,8 +320,12 @@ class FHIRImmunizationPreValidators:
                 "contained[?(@.resourceType=='Patient')].address[0].postalCode",
                 is_postal_code=True,
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -285,11 +340,17 @@ class FHIRImmunizationPreValidators:
         NOTE: occurrenceDateTime is a mandatory FHIR field. A value of None will be rejected by the
         FHIR model before pre-validators are run.
         """
+        
         try:
             occurrence_date_time = values["occurrenceDateTime"]
             PreValidation.for_date_time(occurrence_date_time, "occurrenceDateTime")
-        except KeyError:
-            pass
+        
+        except (ValueError, TypeError, KeyError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -312,9 +373,12 @@ class FHIRImmunizationPreValidators:
                 "contained[?(@.resourceType=='QuestionnaireResponse')]"
                 + ".item[?(@.linkId=='FIELD_TO_REPLACE')]",
             )
-
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, KeyError, IndexError) as error:
+            if isinstance(error, ValueError):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -342,8 +406,12 @@ class FHIRImmunizationPreValidators:
                     )
                 except KeyError:
                     pass
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -365,9 +433,12 @@ class FHIRImmunizationPreValidators:
                     )
 
                 found.append(item.get("actor").get("type"))
-
-        except (KeyError, AttributeError):
-            pass
+        except (ValueError, KeyError, AttributeError) as error:
+            if isinstance(error, ValueError):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, AttributeError)):
+                pass
 
         return values
 
@@ -392,11 +463,13 @@ class FHIRImmunizationPreValidators:
 
         # Check that we have a maximum of 1 internal reference
         if len(performer_actor_internal_references) > 1:
-            raise ValueError(
+            error = ValueError(
                 "performer.actor.reference must be a single reference to a "
                 + "contained Practitioner resource. References found: "
                 + f"{performer_actor_internal_references}"
             )
+            cls.validator_error_list.append_validation_errors(error)
+            raise error
 
         # Obtain the contained practitioner resource
         try:
@@ -412,9 +485,7 @@ class FHIRImmunizationPreValidators:
 
                 # If there is a contained practitioner resource, but no reference raise an error
                 if len(performer_actor_internal_references) == 0:
-                    raise ValueError(
-                        "contained Practitioner ID must be referenced by performer.actor.reference"
-                    )
+                    raise ValueError("contained Practitioner ID must be referenced by performer.actor.reference")
 
                 # If the reference is not equal to the ID then raise an error
                 if (
@@ -426,18 +497,22 @@ class FHIRImmunizationPreValidators:
                     )
             except KeyError as error:
                 # If the contained practitioner resource has no id raise an error
-                raise ValueError(
-                    "The contained Practitioner resource must have an 'id' field"
-                ) from error
+                raise ValueError("The contained Practitioner resource must have an 'id' field")
 
-        except (IndexError, KeyError) as error:
+        except (IndexError, KeyError, ValueError) as error:
+            if isinstance(error, (IndexError, KeyError)):
             # Entering this exception block implies that there is no contained practitioner resource
             # therefore if there is a reference then raise an error
-            if len(performer_actor_internal_references) != 0:
-                raise ValueError(
-                    f"The reference(s) {performer_actor_internal_references} do "
-                    + "not exist in the contained Practitioner resources"
-                ) from error
+                if len(performer_actor_internal_references) != 0:
+                    value_error = ValueError(
+                        f"The reference(s) {performer_actor_internal_references} do "
+                        + "not exist in the contained Practitioner resources"
+                    )
+                    cls.validator_error_list.append_validation_errors(value_error)
+                    raise value_error
+            elif isinstance(error, ValueError):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
 
         return values
 
@@ -457,8 +532,13 @@ class FHIRImmunizationPreValidators:
                 organization_identifier_value,
                 "performer[?(@.actor.type=='Organization')].actor.identifier.value",
             )
-        except (KeyError, IndexError, AttributeError):
-            pass
+
+        except (ValueError, TypeError, KeyError, IndexError, AttributeError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError, AttributeError)):
+                pass
 
         return values
 
@@ -478,8 +558,12 @@ class FHIRImmunizationPreValidators:
                 organization_display,
                 "performer[?@.actor.type == 'Organization'].actor.display",
             )
-        except (KeyError, IndexError, AttributeError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError, AttributeError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (IndexError, AttributeError, KeyError)):
+                pass
 
         return values
 
@@ -491,8 +575,13 @@ class FHIRImmunizationPreValidators:
         try:
             identifier = values["identifier"]
             PreValidation.for_list(identifier, "identifier", defined_length=1)
-        except KeyError:
-            pass
+            
+        except (ValueError, TypeError, KeyError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -505,8 +594,13 @@ class FHIRImmunizationPreValidators:
         try:
             identifier_value = values["identifier"][0]["value"]
             PreValidation.for_string(identifier_value, "identifier[0].value")
-        except (KeyError, IndexError):
-            pass
+            
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, TypeError)):
+                pass
 
         return values
 
@@ -519,8 +613,12 @@ class FHIRImmunizationPreValidators:
         try:
             identifier_system = values["identifier"][0]["system"]
             PreValidation.for_string(identifier_system, "identifier[0].system")
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -547,8 +645,12 @@ class FHIRImmunizationPreValidators:
             PreValidation.for_string(
                 status, "status", predefined_values=Constants.STATUSES
             )
-        except KeyError:
-            pass
+        except (ValueError, TypeError, KeyError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -569,10 +671,15 @@ class FHIRImmunizationPreValidators:
                 "contained[?(@.resourceType=='Practitioner')].name",
                 defined_length=1,
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
+
 
     @classmethod
     def pre_validate_practitioner_name_given(cls, values: dict) -> dict:
@@ -593,8 +700,12 @@ class FHIRImmunizationPreValidators:
                 defined_length=1,
                 elements_are_strings=True,
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -615,8 +726,12 @@ class FHIRImmunizationPreValidators:
                 practitioner_name_family,
                 "contained[?(@.resourceType=='Practitioner')].name[0].family",
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -637,8 +752,12 @@ class FHIRImmunizationPreValidators:
                 "contained[?(@.resourceType=='Practitioner')].identifier",
                 defined_length=1,
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -659,8 +778,12 @@ class FHIRImmunizationPreValidators:
                 practitioner_identifier_value,
                 "contained[?(@.resourceType=='Practitioner')].identifier[0].value",
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -681,8 +804,12 @@ class FHIRImmunizationPreValidators:
                 practitioner_identifier_system,
                 "contained[?(@.resourceType=='Practitioner')].identifier[0].system",
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -704,8 +831,12 @@ class FHIRImmunizationPreValidators:
                     link_id="PerformerSDSJobRole", answer_type=answer_type
                 ),
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -718,8 +849,12 @@ class FHIRImmunizationPreValidators:
         try:
             recorded = values["recorded"]
             PreValidation.for_date(recorded, "recorded")
-        except KeyError:
-            pass
+        except (ValueError, TypeError, KeyError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -732,8 +867,12 @@ class FHIRImmunizationPreValidators:
         try:
             primary_source = values["primarySource"]
             PreValidation.for_boolean(primary_source, "primarySource")
-        except KeyError:
-            pass
+        except (ValueError, TypeError, KeyError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -749,8 +888,12 @@ class FHIRImmunizationPreValidators:
             PreValidation.for_string(
                 report_origin_text, "reportOrigin.text", max_length=100
             )
-        except KeyError:
-            pass
+        except (ValueError, TypeError, KeyError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -765,8 +908,12 @@ class FHIRImmunizationPreValidators:
                 "url",
                 "extension[?(@.url=='FIELD_TO_REPLACE')]",
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, KeyError, IndexError) as error:
+            if isinstance(error, ValueError):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -793,8 +940,12 @@ class FHIRImmunizationPreValidators:
                     )
                 except KeyError:
                     pass
-        except KeyError:
-            pass
+        except (ValueError, KeyError) as error:
+            if isinstance(error, ValueError):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -823,8 +974,12 @@ class FHIRImmunizationPreValidators:
                 vaccination_procedure_code,
                 generate_field_location_for_extension(url, system, field_type),
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -853,8 +1008,12 @@ class FHIRImmunizationPreValidators:
                 vaccination_procedure_display,
                 generate_field_location_for_extension(url, system, field_type),
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -880,8 +1039,12 @@ class FHIRImmunizationPreValidators:
                 vaccination_situation_code,
                 generate_field_location_for_extension(url, system, field_type),
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -907,8 +1070,12 @@ class FHIRImmunizationPreValidators:
                 vaccination_situation_display,
                 generate_field_location_for_extension(url, system, field_type),
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -926,8 +1093,12 @@ class FHIRImmunizationPreValidators:
                 "system",
                 "statusReason.coding[?(@.system=='FIELD_TO_REPLACE')]",
             )
-        except KeyError:
-            pass
+        except (ValueError, KeyError) as error:
+            if isinstance(error, ValueError):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -948,8 +1119,12 @@ class FHIRImmunizationPreValidators:
                 status_reason_coding_code,
                 "statusReason.coding[?(@.system=='http://snomed.info/sct')].code",
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -970,8 +1145,12 @@ class FHIRImmunizationPreValidators:
                 status_reason_coding_display,
                 "statusReason.coding[?(@.system=='http://snomed.info/sct')].display",
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -985,8 +1164,12 @@ class FHIRImmunizationPreValidators:
                 "protocolApplied",
                 defined_length=1,
             )
-        except KeyError:
-            pass
+        except (ValueError, TypeError, KeyError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -1007,8 +1190,12 @@ class FHIRImmunizationPreValidators:
                 "protocolApplied[0].doseNumberPositiveInt",
                 max_value=9,
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1023,8 +1210,12 @@ class FHIRImmunizationPreValidators:
                 "system",
                 "vaccineCode.coding[?(@.system=='FIELD_TO_REPLACE')]",
             )
-        except KeyError:
-            pass
+        except (ValueError, KeyError) as error:
+            if isinstance(error, ValueError):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -1045,8 +1236,12 @@ class FHIRImmunizationPreValidators:
                 status_reason_coding_code,
                 "vaccineCode.coding[?(@.system=='http://snomed.info/sct')].code",
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1067,8 +1262,12 @@ class FHIRImmunizationPreValidators:
                 vaccine_code_coding_display,
                 "vaccineCode.coding[?(@.system=='http://snomed.info/sct')].display",
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1081,8 +1280,12 @@ class FHIRImmunizationPreValidators:
         try:
             manufacturer_display = values["manufacturer"]["display"]
             PreValidation.for_string(manufacturer_display, "manufacturer.display")
-        except KeyError:
-            pass
+        except (ValueError, TypeError, KeyError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -1095,8 +1298,12 @@ class FHIRImmunizationPreValidators:
         try:
             lot_number = values["lotNumber"]
             PreValidation.for_string(lot_number, "lotNumber", max_length=100)
-        except KeyError:
-            pass
+        except (ValueError, TypeError, KeyError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -1109,8 +1316,12 @@ class FHIRImmunizationPreValidators:
         try:
             expiration_date = values["expirationDate"]
             PreValidation.for_date(expiration_date, "expirationDate")
-        except KeyError:
-            pass
+        except (ValueError, TypeError, KeyError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -1125,8 +1336,12 @@ class FHIRImmunizationPreValidators:
                 "system",
                 "site.coding[?(@.system=='FIELD_TO_REPLACE')]",
             )
-        except KeyError:
-            pass
+        except (ValueError, KeyError) as error:
+            if isinstance(error, ValueError):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -1146,8 +1361,12 @@ class FHIRImmunizationPreValidators:
                 site_coding_code,
                 "site.coding[?(@.system=='http://snomed.info/sct')].code",
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1168,8 +1387,12 @@ class FHIRImmunizationPreValidators:
                 site_coding_display,
                 "site.coding[?(@.system=='http://snomed.info/sct')].display",
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1184,8 +1407,12 @@ class FHIRImmunizationPreValidators:
                 "system",
                 "route.coding[?(@.system=='FIELD_TO_REPLACE')]",
             )
-        except KeyError:
-            pass
+        except (ValueError, KeyError) as error:
+            if isinstance(error, ValueError):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -1205,8 +1432,12 @@ class FHIRImmunizationPreValidators:
                 route_coding_code,
                 "route.coding[?(@.system=='http://snomed.info/sct')].code",
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1227,8 +1458,12 @@ class FHIRImmunizationPreValidators:
                 route_coding_display,
                 "route.coding[?(@.system=='http://snomed.info/sct')].display",
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1252,9 +1487,12 @@ class FHIRImmunizationPreValidators:
             PreValidation.for_integer_or_decimal(
                 dose_quantity_value, "doseQuantity.value", max_decimal_places=4
             )
-        except KeyError:
-            pass
-
+        except (ValueError, TypeError, KeyError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
         return values
 
     @classmethod
@@ -1266,8 +1504,12 @@ class FHIRImmunizationPreValidators:
         try:
             dose_quantity_code = values["doseQuantity"]["code"]
             PreValidation.for_string(dose_quantity_code, "doseQuantity.code")
-        except KeyError:
-            pass
+        except (ValueError, TypeError, KeyError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -1280,8 +1522,12 @@ class FHIRImmunizationPreValidators:
         try:
             dose_quantity_unit = values["doseQuantity"]["unit"]
             PreValidation.for_string(dose_quantity_unit, "doseQuantity.unit")
-        except KeyError:
-            pass
+        except (ValueError, TypeError, KeyError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -1301,8 +1547,12 @@ class FHIRImmunizationPreValidators:
                     )
                 except KeyError:
                     pass
-        except KeyError:
-            pass
+        except (ValueError, TypeError, KeyError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -1321,8 +1571,12 @@ class FHIRImmunizationPreValidators:
                     )
                 except KeyError:
                     pass
-        except KeyError:
-            pass
+        except (ValueError, TypeError, KeyError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -1342,8 +1596,12 @@ class FHIRImmunizationPreValidators:
                     )
                 except KeyError:
                     pass
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1370,8 +1628,12 @@ class FHIRImmunizationPreValidators:
                 + "[?(@.system=='https://fhir.nhs.uk/Id/nhs-number')].extension[?(@.url=="
                 + "'FIELD_TO_REPLACE')]",
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, KeyError, IndexError) as error:
+            if isinstance(error, ValueError):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1411,8 +1673,12 @@ class FHIRImmunizationPreValidators:
                 + "NHSNumberVerificationStatus')].valueCodeableConcept.coding"
                 + "[?(@.system=='FIELD_TO_REPLACE')]",
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, KeyError, IndexError) as error:
+            if isinstance(error, ValueError):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1456,8 +1722,12 @@ class FHIRImmunizationPreValidators:
                 nhs_number_verification_status_code,
                 field_location,
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1501,8 +1771,12 @@ class FHIRImmunizationPreValidators:
                 nhs_number_verification_status_display,
                 field_location,
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1522,8 +1796,12 @@ class FHIRImmunizationPreValidators:
                 organization_identifier_system,
                 "performer[?(@.actor.type=='Organization')].actor.identifier.system",
             )
-        except (KeyError, IndexError, AttributeError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError, AttributeError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError, AttributeError)):
+                pass
 
         return values
 
@@ -1549,8 +1827,12 @@ class FHIRImmunizationPreValidators:
                 ),
                 max_length=20,
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1575,8 +1857,12 @@ class FHIRImmunizationPreValidators:
                     link_id="LocalPatient", answer_type=answer_type, field_type="system"
                 ),
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1601,8 +1887,12 @@ class FHIRImmunizationPreValidators:
                     link_id="Consent", answer_type=answer_type, field_type="code"
                 ),
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1627,8 +1917,12 @@ class FHIRImmunizationPreValidators:
                     link_id="Consent", answer_type=answer_type, field_type="display"
                 ),
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1653,8 +1947,12 @@ class FHIRImmunizationPreValidators:
                     link_id="CareSetting", answer_type=answer_type, field_type="code"
                 ),
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1679,8 +1977,12 @@ class FHIRImmunizationPreValidators:
                     link_id="CareSetting", answer_type=answer_type, field_type="display"
                 ),
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1702,8 +2004,12 @@ class FHIRImmunizationPreValidators:
                     link_id="IpAddress", answer_type=answer_type
                 ),
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1725,8 +2031,12 @@ class FHIRImmunizationPreValidators:
                     link_id="UserId", answer_type=answer_type
                 ),
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1748,8 +2058,12 @@ class FHIRImmunizationPreValidators:
                     link_id="UserName", answer_type=answer_type
                 ),
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1771,8 +2085,12 @@ class FHIRImmunizationPreValidators:
                     link_id="UserEmail", answer_type=answer_type
                 ),
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1797,8 +2115,12 @@ class FHIRImmunizationPreValidators:
                     link_id="SubmittedTimeStamp", answer_type=answer_type
                 ),
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1813,8 +2135,12 @@ class FHIRImmunizationPreValidators:
             PreValidation.for_string(
                 location_identifier_value, "location.identifier.value"
             )
-        except KeyError:
-            pass
+        except (ValueError, TypeError, KeyError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -1829,8 +2155,12 @@ class FHIRImmunizationPreValidators:
             PreValidation.for_string(
                 location_identifier_system, "location.identifier.system"
             )
-        except KeyError:
-            pass
+        except (ValueError, TypeError, KeyError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, KeyError):
+                pass
 
         return values
 
@@ -1852,8 +2182,12 @@ class FHIRImmunizationPreValidators:
                     link_id="ReduceValidation", answer_type=answer_type
                 ),
             )
-        except (KeyError, IndexError):
-            pass
+        except (TypeError, KeyError, IndexError) as error:
+            if isinstance(error, TypeError):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values
 
@@ -1876,7 +2210,11 @@ class FHIRImmunizationPreValidators:
                     answer_type=answer_type,
                 ),
             )
-        except (KeyError, IndexError):
-            pass
+        except (ValueError, TypeError, KeyError, IndexError) as error:
+            if isinstance(error, (ValueError, TypeError)):
+                cls.validator_error_list.append_validation_errors(error)
+                raise error
+            elif isinstance(error, (KeyError, IndexError)):
+                pass
 
         return values

@@ -4,7 +4,17 @@ from typing import Literal
 from fhir.resources.R4B.immunization import Immunization
 from models.fhir_immunization_pre_validators import FHIRImmunizationPreValidators
 from models.fhir_immunization_post_validators import FHIRImmunizationPostValidators
-from models.utils.generic_utils import get_generic_questionnaire_response_value
+from models.utils.generic_utils import get_generic_questionnaire_response_value, Validator_error_list
+from pydantic import ValidationError
+
+
+
+class CoarseValidationError(Exception):
+    """Custom exception for aggregated validation errors"""
+
+    def __init__(self, message="Coarse validation error"):
+        self.message = message
+        super().__init__(self.message)
 
 
 class ImmunizationValidator:
@@ -487,6 +497,7 @@ class ImmunizationValidator:
         """Generate the Immunization model"""
         self.set_reduce_validation_code(json_data)
         self.add_custom_root_pre_validators()
+        
         if self.add_post_validators and not self.reduce_validation_code:
             self.add_custom_root_post_validators()
         immunization = self.immunization.parse_obj(json_data)
