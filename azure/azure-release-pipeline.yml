@@ -33,16 +33,12 @@ extends:
     apigee_deployments:
       - environment: internal-dev-sandbox
         proxy_path: sandbox
+        manual_approval_prod: true
         jinja_templates:
           DOMAIN_ENDPOINT: just-dummy-value-for-successful-build
         post_deploy:
           - template: ./templates/post-deploy.yml
-      - environment: sandbox
-        proxy_path: sandbox
-        jinja_templates:
-          DOMAIN_ENDPOINT: just-dummy-value-for-successful-build
-        depends_on:
-          - manual_approval
+
 
 
 
