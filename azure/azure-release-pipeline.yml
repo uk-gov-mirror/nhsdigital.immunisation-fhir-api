@@ -33,18 +33,16 @@ extends:
     apigee_deployments:
       - environment: internal-dev-sandbox
         proxy_path: sandbox
-        jobs:
-          - job: WaitForValidation
-            displayName: Wait for approval
-            steps:
-              - task: ManualValidation@0
-                timeoutInMinutes: 1440 # task times out in 1 day
-                inputs:
-                  instructions: 'Approve the deployment'
         jinja_templates:
           DOMAIN_ENDPOINT: just-dummy-value-for-successful-build
         post_deploy:
           - template: ./templates/post-deploy.yml
+      - environment: sandbox
+        proxy_path: sandbox
+        jinja_templates:
+          DOMAIN_ENDPOINT: just-dummy-value-for-successful-build
+        depends_on:
+          - manual_approval
 
 
 
