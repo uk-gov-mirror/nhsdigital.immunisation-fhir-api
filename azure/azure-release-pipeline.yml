@@ -31,38 +31,35 @@ extends:
     short_service_name: ${{ variables.short_service_name }}
     service_base_path: ${{ variables.service_base_path }}
     apigee_deployments:
-      # - environment: internal-dev
-      #   jinja_templates:
-      #     DOMAIN_ENDPOINT: https://internal-dev.imms.dev.api.platform.nhs.uk
-      #   post_deploy:
-      #     - template: ./templates/post-deploy.yml
+      - environment: internal-dev
+        jinja_templates:
+          DOMAIN_ENDPOINT: https://internal-dev.imms.dev.api.platform.nhs.uk
+        post_deploy:
+          - template: ./templates/post-deploy.yml
       - environment: internal-dev-sandbox
-      - task: ManualValidation@0
-        inputs:
-          instructions: 'Approve the deployment'
         proxy_path: sandbox
         jinja_templates:
           DOMAIN_ENDPOINT: just-dummy-value-for-successful-build
         post_deploy:
           - template: ./templates/post-deploy.yml
-      # - environment: sandbox
-      #   proxy_path: sandbox
-      #   jinja_templates:
-      #     DOMAIN_ENDPOINT: just-dummy-value-for-successful-build
-      #   depends_on:
-      #     - internal_dev_sandbox
-      # - environment: ref
-      #   depends_on:
-      #       - internal_dev
-      #       - internal_dev_sandbox
-      #   jinja_templates:
-      #       DOMAIN_ENDPOINT: https://ref.imms.dev.api.platform.nhs.uk
-      #   post_deploy:
-      #       - template: ./templates/post-deploy.yml
-      # - environment: int
-      #   depends_on:
-      #     - internal_dev
-      #   jinja_templates:
-      #     DOMAIN_ENDPOINT: https://int.imms.dev.api.platform.nhs.uk
-      #   post_deploy:
-      #      - template: ./templates/post-deploy.yml
+      - environment: sandbox
+        proxy_path: sandbox
+        jinja_templates:
+          DOMAIN_ENDPOINT: just-dummy-value-for-successful-build
+        depends_on:
+          - internal_dev_sandbox
+      - environment: ref
+        depends_on:
+            - internal_dev
+            - internal_dev_sandbox
+        jinja_templates:
+            DOMAIN_ENDPOINT: https://ref.imms.dev.api.platform.nhs.uk
+        post_deploy:
+            - template: ./templates/post-deploy.yml
+      - environment: int
+        depends_on:
+          - internal_dev
+        jinja_templates:
+          DOMAIN_ENDPOINT: https://int.imms.dev.api.platform.nhs.uk
+        post_deploy:
+           - template: ./templates/post-deploy.yml
