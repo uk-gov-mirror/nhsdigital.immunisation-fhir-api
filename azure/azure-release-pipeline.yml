@@ -37,8 +37,10 @@ extends:
           DOMAIN_ENDPOINT: just-dummy-value-for-successful-build
         post_deploy:
           - template: ./templates/post-deploy.yml
+      - environment: manual-approval
+        manual_approval_prod: true
       - environment: sandbox
-        proxy_path: sandbox
+        proxy_path: sandbox        
         jinja_templates:
           DOMAIN_ENDPOINT: just-dummy-value-for-successful-build
         depends_on:
