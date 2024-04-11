@@ -31,16 +31,18 @@ extends:
     short_service_name: ${{ variables.short_service_name }}
     service_base_path: ${{ variables.service_base_path }}
     apigee_deployments:
-      - environment: manual-approval
-        manual_approval_prod: true
       - environment: internal-dev-sandbox
-        proxy_path: sandbox        
+        proxy_path: sandbox
+        jinja_templates:
+          DOMAIN_ENDPOINT: just-dummy-value-for-successful-build
+        post_deploy:
+          - template: ./templates/post-deploy.yml
+      - environment: sandbox
+        proxy_path: sandbox
         jinja_templates:
           DOMAIN_ENDPOINT: just-dummy-value-for-successful-build
         depends_on:
           - manual_approval
-        post_deploy:
-          - template: ./templates/post-deploy.yml
 
 
 
