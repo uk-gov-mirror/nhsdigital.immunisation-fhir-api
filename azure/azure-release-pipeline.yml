@@ -45,7 +45,7 @@ extends:
           DOMAIN_ENDPOINT: just-dummy-value-for-successful-build
         depends_on:
           - manual_approval
-          - internal-dev-sandbox
+          - internal_dev_sandbox
 
 
 
