@@ -165,6 +165,8 @@ class FhirController:
             search_params.date_from,
             search_params.date_to,
         )
+        if "severity" in result:
+           return self.create_response(400, json.dumps(result)) 
 
         # Workaround for fhir.resources JSON removing the empty "entry" list.
         result_json_dict: dict = json.loads(result.json())
