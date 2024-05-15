@@ -24,7 +24,7 @@ class TestSearchImmunization(ImmunizationBaseTest):
         for imms_api in self.imms_apis:
             with self.subTest(imms_api):
                 # Given two patients each with one mmr
-                # TODO: BUG Check why mmr_p2 has flu vaccine type
+                # TODO: BUG Check why mmr_p2 has flu vaccine type. Also see next test.
                 mmr_p1 = create_an_imms_obj(str(uuid.uuid4()), valid_nhs_number1, VaccineTypes.mmr)
                 mmr_p2 = create_an_imms_obj(str(uuid.uuid4()), valid_nhs_number2, VaccineTypes.flu)
                 self.store_records(mmr_p1, mmr_p2)

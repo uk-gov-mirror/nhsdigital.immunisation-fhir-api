@@ -165,7 +165,7 @@ class FhirService:
         """find all instances of Immunization(s) for a patient and specified disease type.
         Returns Bundle[Immunization]
         """
-        # TODO: VACCINE_TYPE is disease type a mandatory field? (I assumed it is)
+        # TODO: is disease type a mandatory field? (I assumed it is)
         #  i.e. Should we provide a search option for getting Patient's entire imms history?
         if not nhs_number_mod11_check(nhs_number):
             diagnostics_error = create_diagnostics(nhs_number)
@@ -174,7 +174,7 @@ class FhirService:
         resources = [
             r
             for r in resources
-            # TODO: VACCINE_TYPE Change this implementation to use the vaccine type indexed on creation
+            # TODO: BUG This implementation should use the vaccine type indexed on creation
             if FhirService.has_valid_vaccine_type(r, vaccine_types)
             and FhirService.is_valid_date_from(r, date_from)
             and FhirService.is_valid_date_to(r, date_to)
