@@ -11,6 +11,7 @@ class TestCreateImmunization(ImmunizationBaseTest):
             with self.subTest(imms_api):
                 # Given
                 imms = create_an_imms_obj()
+                del imms["id"]
 
                 # When
                 response = imms_api.create_immunization(imms)
@@ -36,6 +37,7 @@ class TestCreateImmunization(ImmunizationBaseTest):
         """it should reject the request if nhs-number does not exist"""
         bad_nhs_number = "7463384756"
         imms = create_an_imms_obj(nhs_number=bad_nhs_number)
+        del imms["id"]
 
         response = self.default_imms_api.create_immunization(imms)
 
@@ -86,6 +88,7 @@ class TestCreateImmunization(ImmunizationBaseTest):
     def test_no_patient_identifier(self):
         """it should accept the request if patient identifier is missing"""
         imms = create_an_imms_obj()
+        del imms["id"]
         del imms["contained"][1]["identifier"]
 
         response = self.default_imms_api.create_immunization(imms)
@@ -104,6 +107,7 @@ class TestCreateImmunization(ImmunizationBaseTest):
         imms = create_an_imms_obj(
             nhs_number=None, sample_data_file_name="completed_covid19_immunization_event_with_id_mandatory_fields_only"
         )
+        del imms["id"]
 
         # When
         response = self.default_imms_api.create_immunization(imms)
@@ -118,6 +122,7 @@ class TestCreateImmunization(ImmunizationBaseTest):
         imms = create_an_imms_obj(
             nhs_number=None, sample_data_file_name="completed_covid19_immunization_event_with_id_mandatory_fields_only"
         )
+        del imms["id"]
         del imms["primarySource"]
 
         # When

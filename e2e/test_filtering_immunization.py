@@ -12,12 +12,14 @@ class SFlagBaseTest(ImmunizationBaseTest):
 
     def create_s_flagged_patient(self, imms_api: ImmunisationApi) -> dict:
         imms = create_an_imms_obj(nhs_number=valid_nhs_number_with_s_flag)
+        del imms["id"]
         imms_id = self.create_immunization_resource(imms_api, imms)
         imms["id"] = imms_id
         return imms
 
     def create_not_s_flagged_patient(self, imms_api: ImmunisationApi) -> dict:
         imms = create_an_imms_obj(nhs_number=valid_nhs_number1)
+        del imms["id"]
         imms_id = self.create_immunization_resource(imms_api, imms)
         imms["id"] = imms_id
         return imms

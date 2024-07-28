@@ -64,6 +64,7 @@ class TestApplicationRestrictedAuthorization(ImmunizationBaseTest):
         self.make_app({Permission.CREATE})
         # When
         imms = create_an_imms_obj()
+        del imms["id"]
         response = self.my_imms_api.create_immunization(imms)
         # Then
         self.assertEqual(response.status_code, 201, response.text)
@@ -73,6 +74,7 @@ class TestApplicationRestrictedAuthorization(ImmunizationBaseTest):
         self.make_app({Permission.CREATE}, {"flu:create"})
         # When
         imms = create_an_imms_obj()
+        del imms["id"]
         response = self.my_imms_api.create_immunization(imms)
         # Then
         self.assertEqual(response.status_code, 403, response.text)
@@ -83,6 +85,7 @@ class TestApplicationRestrictedAuthorization(ImmunizationBaseTest):
         self.make_app(perms)
         # When
         imms = create_an_imms_obj()
+        del imms["id"]
         result = self.my_imms_api.create_immunization(imms)
         # Then
         self.assertEqual(result.status_code, 403, result.text)
@@ -235,6 +238,7 @@ class TestCis2Authorization(ImmunizationBaseTest):
         self.make_app({Permission.CREATE})
         # When
         imms = create_an_imms_obj()
+        del imms["id"]
         response = self.my_imms_api.create_immunization(imms)
         # Then
         self.assertEqual(response.status_code, 201, response.text)
@@ -245,6 +249,7 @@ class TestCis2Authorization(ImmunizationBaseTest):
         self.make_app(perms)
         # When
         imms = create_an_imms_obj()
+        del imms["id"]
         result = self.my_imms_api.create_immunization(imms)
         # Then
         self.assertEqual(result.status_code, 403, result.text)
@@ -254,6 +259,7 @@ class TestCis2Authorization(ImmunizationBaseTest):
         self.make_app({Permission.CREATE}, {"flu:create"})
         # When
         imms = create_an_imms_obj()
+        del imms["id"]
         response = self.my_imms_api.create_immunization(imms)
         # Then
         self.assertEqual(response.status_code, 403, response.text)
