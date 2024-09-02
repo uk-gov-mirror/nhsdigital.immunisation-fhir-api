@@ -113,32 +113,41 @@ class PreValidation:
     @staticmethod
     def for_date_time(field_value: str, field_location: str):
         """
-        Apply pre-validation to a datetime field to ensure that it is a string (JSON dates must be
-        written as strings) containing a valid datetime in the format "YYYY-MM-DDThh:mm:ss+zz:zz" or
-        "YYYY-MM-DDThh:mm:ss-zz:zz" (i.e. date and time, including timezone offset in hours and
-        minutes)
+        Apply pre-validation to a field to ensure that it is a string (JSON dates must be
+        written as strings) containing either a valid datetime in the format "YYYY-MM-DDThh:mm:ss+zz:zz" 
+        or "YYYY-MM-DDThh:mm:ss-zz:zz" (i.e. date and time, including timezone offset in hours and
+        minutes), or a valid date in the format "YYYY-MM-DD".
         """
 
         if not isinstance(field_value, str):
             raise TypeError(f"{field_location} must be a string")
 
-        date_time_pattern_with_timezone = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.[0-9]+)?(\+|-)\d{2}:\d{2}")
+        # Patterns for datetime with timezone and date
+        date_time_pattern_with_timezone = re.compile(
+            r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.[0-9]+)?([+-]\d{2}:\d{2})$"
+        )
+        date_pattern = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
-        if not date_time_pattern_with_timezone.fullmatch(field_value):
+        if not (date_time_pattern_with_timezone.fullmatch(field_value) or date_pattern.fullmatch(field_value)):
             raise ValueError(
                 f'{field_location} must be a string in the format "YYYY-MM-DDThh:mm:ss+zz:zz" or '
                 + '"YYYY-MM-DDThh:mm:ss-zz:zz" (i.e date and time, including timezone offset in '
                 + "hours and minutes). Milliseconds are optional after the seconds "
-                + "(e.g. 2021-01-01T00:00:00.000+00:00)."
+                + "(e.g. 2021-01-01T00:00:00.000+00:00). or in the format 'YYYY-MM-DD' (i.e., date only e.g. 2021-01-01)"
             )
 
+        # Validate datetime format
         try:
-            datetime.strptime(field_value, "%Y-%m-%dT%H:%M:%S%z")
-        except ValueError:
-            try:
-                datetime.strptime(field_value, "%Y-%m-%dT%H:%M:%S.%f%z")
-            except ValueError as value_error:
-                raise ValueError(f"{field_location} must be a valid datetime") from value_error
+            if date_time_pattern_with_timezone.fullmatch(field_value):
+                try:
+                    datetime.strptime(field_value, "%Y-%m-%dT%H:%M:%S%z")
+                except ValueError:
+                    datetime.strptime(field_value, "%Y-%m-%dT%H:%M:%S.%f%z")
+            elif date_pattern.fullmatch(field_value):
+                # Parse as date only
+                datetime.strptime(field_value, "%Y-%m-%d")
+        except ValueError as value_error:
+            raise ValueError(f"{field_location} must be a valid datetime or date") from value_error
 
     @staticmethod
     def for_boolean(field_value: str, field_location: str):
