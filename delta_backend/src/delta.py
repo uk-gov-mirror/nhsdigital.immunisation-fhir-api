@@ -74,7 +74,7 @@ def handler(event, context):
                     if operation == "CREATE":
                         operation = "NEW"
                     resource_json = json.loads(new_image["Resource"]["S"])    
-                    flat_json = convert_to_flat_json(resource_json, operation)
+                    flat_json = json.dumps(convert_to_flat_json(resource_json, operation))
                     response = delta_table.put_item(
                         Item={
                             "PK": str(uuid.uuid4()),
