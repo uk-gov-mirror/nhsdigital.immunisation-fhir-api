@@ -52,12 +52,10 @@ extends:
           DOMAIN_ENDPOINT: just-dummy-value-for-successful-build
         depends_on:
           - internal_dev_sandbox
-      - environment: manual-approval
-        manual_approval_prod: true
       - environment: ref
         depends_on:
             - internal_dev
-            - internal_dev_sandbox            
+            - internal_dev_sandbox
         jinja_templates:
             DOMAIN_ENDPOINT: https://ref.imms.dev.vds.platform.nhs.uk
         post_deploy:
@@ -76,12 +74,10 @@ extends:
       - environment: prod
         depends_on:
           - int
-          - sandbox
-          - manual_approval
+          - ref
         jinja_templates:
           DOMAIN_ENDPOINT: https://imms.prod.vds.platform.nhs.uk
         post_deploy:
             - template: ./templates/post-deploy.yml
               parameters:
                 aws_account_type: 'prod'
-           
