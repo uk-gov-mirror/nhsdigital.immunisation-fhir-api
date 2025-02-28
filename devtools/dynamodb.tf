@@ -21,7 +21,7 @@ provider "aws" {
 }
 
 locals {
-    short_prefix = "local"
+    short_prefix = "imms-default"
 }
 
 resource "aws_dynamodb_table" "events-dynamodb-table" {
