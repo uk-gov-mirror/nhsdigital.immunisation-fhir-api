@@ -5,6 +5,8 @@ from FHIRParser import FHIRParser
 from SchemaParser import SchemaParser
 from ConversionChecker import ConversionChecker
 import ConversionLayout
+from datetime import datetime
+from extractor import extract_person_names,extract_practitioner_names,extract_site_code,get_patient,get_valid_address,get_valid_names
 
 # Converter variables
 FHIRData = ""
@@ -34,7 +36,7 @@ class Converter:
         return schemaParser
 
     # Convert data against converter schema
-    def _convertData(self, ConversionValidate, expression, dataParser):
+    def _convertData(self, ConversionValidate, expression, dataParser, json_data):
 
         FHIRFieldName = expression["fieldNameFHIR"]
         FlatFieldName = expression["fieldNameFlat"]
@@ -54,11 +56,13 @@ class Converter:
             convertedData = ConversionValidate.convertData(
                 expressionType, expressionRule, FHIRFieldName, conversionValue
             )
+            if FHIRFieldName == "contained|#:":
+                convertedData= self.extract_patient_details(json_data, FlatFieldName)
             if convertedData is not None:
                 Converted[FlatFieldName] = convertedData
 
     # run the conversion against the data
-    def runConversion(self, summarise=False, report_unexpected_exception=True):
+    def runConversion(self, json_data, summarise=False, report_unexpected_exception=True):
         try:
             dataParser = self._getFHIRParser(self.FHIRData)
         except Exception as e:
@@ -97,10 +101,34 @@ class Converter:
                 return p
 
         for conversion in conversions:
-            rows = self._convertData(ConversionValidate, conversion, dataParser)
+            rows = self._convertData(ConversionValidate, conversion, dataParser, json_data)
 
         imms.append(Converted)
         return imms
 
     def getErrorRecords(self):
         return ErrorRecords
+
+    def extract_patient_details(self, json_data, FlatFieldName):
+        occurrence_time = datetime.strptime(json_data.get("occurrenceDateTime", ""), "%Y-%m-%dT%H:%M:%S%z")
+        patient = get_patient(json_data)
+        if not patient:
+            return None
+        
+        person_forename, person_surname = extract_person_names(patient, occurrence_time)
+        postal_code = get_valid_address(patient, occurrence_time)
+        site_code, site_code_type_uri = extract_site_code(json_data)
+        performing_professional_forename, performing_professional_surname = extract_practitioner_names(json_data, occurrence_time)
+        
+        field_map = {
+            "PERSON_FORENAME": person_forename,
+            "PERSON_SURNAME": person_surname,
+            "PERSON_POSTCODE": postal_code,
+            "SITE_CODE": site_code,
+            "SITE_CODE_TYPE_URI": site_code_type_uri,
+            "PERFORMING_PROFESSIONAL_FORENAME": performing_professional_forename,
+            "PERFORMING_PROFESSIONAL_SURNAME": performing_professional_surname
+        }
+        
+        return field_map.get(FlatFieldName)
+         

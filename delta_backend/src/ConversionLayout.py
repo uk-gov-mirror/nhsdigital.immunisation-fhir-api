@@ -18,7 +18,7 @@ ConvertLayout = {
       }
     },
     {
-      "fieldNameFHIR": "contained|#:Patient|name|#:official|given|0",
+      "fieldNameFHIR": "contained|#:",
       "fieldNameFlat": "PERSON_FORENAME",
       "expression": {
         "expressionName": "Not Empty",
@@ -27,7 +27,7 @@ ConvertLayout = {
       }
     },
     {
-      "fieldNameFHIR": "contained|#:Patient|name|#:official|family",
+      "fieldNameFHIR": "contained|#:",
       "fieldNameFlat": "PERSON_SURNAME",
       "expression": {
         "expressionName": "Not Empty",
@@ -54,7 +54,7 @@ ConvertLayout = {
       }
     },
     {
-      "fieldNameFHIR": "contained|#:Patient|address|#:postalCode|postalCode",
+      "fieldNameFHIR": "contained|#:",
       "fieldNameFlat": "PERSON_POSTCODE",
       "expression": {
         "expressionName": "Defaults to",
@@ -117,7 +117,7 @@ ConvertLayout = {
       }
     },
     {
-      "fieldNameFHIR": "contained|#:Practitioner|name|0|given|0",
+      "fieldNameFHIR": "contained|#:",
       "fieldNameFlat": "PERFORMING_PROFESSIONAL_FORENAME",
       "expression": {
         "expressionName": "Not Empty",
@@ -126,7 +126,7 @@ ConvertLayout = {
       }
     },
     {
-      "fieldNameFHIR": "contained|#:Practitioner|name|0|family",
+      "fieldNameFHIR": "contained|#:",
       "fieldNameFlat": "PERFORMING_PROFESSIONAL_SURNAME",
       "expression": {
         "expressionName": "Not Empty",

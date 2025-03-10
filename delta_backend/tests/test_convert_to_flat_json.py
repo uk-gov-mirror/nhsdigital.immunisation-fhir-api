@@ -18,7 +18,7 @@ MOCK_ENV_VARS = {
     "DELTA_TABLE_NAME": "immunisation-batch-internal-dev-audit-test-table",
     "SOURCE": "test-source",
 }
-
+request_json_data=ValuesForTests.json_data
 with patch.dict("os.environ", MOCK_ENV_VARS):
     from delta import handler, Converter
     from Converter import imms
@@ -104,7 +104,7 @@ class TestConvertToFlatJson(unittest.TestCase):
         start = time.time()
 
         FHIRConverter = Converter(json_data)
-        FlatFile = FHIRConverter.runConversion(False, True)
+        FlatFile = FHIRConverter.runConversion(ValuesForTests.json_data, False, True)
 
         flatJSON = json.dumps(FlatFile)
         expected_imms_value = deepcopy(ValuesForTests.expected_imms)  # UPDATE is currently the default action-flag
@@ -132,7 +132,7 @@ class TestConvertToFlatJson(unittest.TestCase):
             start = time.time()
 
             FHIRConverter = Converter(json_data)
-            FlatFile = FHIRConverter.runConversion(False, True)
+            FlatFile = FHIRConverter.runConversion(ValuesForTests.json_data, False, True)
 
             flatJSON = json.dumps(FlatFile)
 
@@ -191,6 +191,410 @@ class TestConvertToFlatJson(unittest.TestCase):
                 batch.delete_item(Key={"PK": item["PK"]})
         result = self.table.scan()
         items = result.get("Items", [])
+
+class TestPersonForeNameToFlatJson(unittest.TestCase):
+    def test_person_forename_multiple_names_official(self):
+        """Test case where multiple name instances exist, and one has use=official with period covering vaccination date"""
+        request_json_data["contained"][1]["name"] = [
+            {"family": "Doe", "given": ["Johnny"], "use": "nickname", "period": {"start": "2021-01-01", "end": "2022-01-01"}},
+            {"family": "Doe", "given": ["John"], "use": "official", "period": {"start": "2020-01-01", "end": "2021-01-01"}},
+            {"family": "Doe", "given": ["Manny"], "use": "official", "period": {"start": "2021-01-01", "end": "2021-02-09"}},
+            {"family": "Doe", "given": ["Davis"], "use": "official", "period": {"start": "2021-01-01", "end": "2021-02-09"}},
+        ]
+        expected_forename = "Manny"
+        self._run_test(expected_forename)
+    
+    def test_person_forename_multiple_names_current(self):
+        """Test case where no official name is present, but a name is current at the vaccination date"""
+        request_json_data["contained"][1]["name"] = [
+            {"family": "Doe", "given": ["John"], "period": {"start": "2020-01-01", "end": "2023-01-01"}},
+            {"family": "Doe", "given": ["Johnny"], "use": "nickname"}     
+        ]
+        expected_forename = "John"
+        self._run_test(expected_forename)
+
+    def test_person_forename_single_name(self):
+        """Test case where only one name instance exists"""
+        request_json_data["contained"][1]["name"] = [
+            {"family": "Doe", "given": ["Alex"], "use": "nickname"}
+        ]
+        expected_forename = "Alex"
+        self._run_test(expected_forename)
+
+    def test_person_forename_no_official_but_current_not_old(self):
+        """Test case where no official name is present, but a current name with use!=old exists at vaccination date"""
+        request_json_data["contained"][1]["name"] = [
+            {"family": "Doe", "given": ["John"], "use": "old", "period": {"start": "2018-01-01", "end": "2020-12-31"}},
+            {"family": "Doe", "given": ["Chris"], "use": "nickname", "period": {"start": "2021-01-01", "end": "2023-01-01"}}
+        ]
+        expected_forename = "Chris"
+        self._run_test(expected_forename)
+
+    def test_person_forename_fallback_to_first_name(self):
+        """Test case where no names match the previous conditions, fallback to first available name"""
+        request_json_data["contained"][1]["name"] = [
+            {"family": "Doe", "given": ["Elliot"],"use": "nickname"},
+            {"family": "Doe", "given": ["John"], "use": "old", "period": {"start": "2018-01-01", "end": "2020-12-31"}},
+            {"family": "Doe", "given": ["Chris"], "use": "nickname", "period": {"start": "2021-01-01", "end": "2023-01-01"}}
+        ]
+        expected_forename = "Elliot"
+        self._run_test(expected_forename)
+
+    def test_person_forename_multiple_given_names_concatenation(self):
+        """Test case where the selected name has multiple given names"""
+        request_json_data["contained"][1]["name"] = [
+            {"family": "Doe", "given": ["Chris"], "use": "nickname", "period": {"start": "2021-01-01", "end": "2023-01-01"}},
+            {"family": "Doe", "given": ["Alice", "Marie"], "use": "official", "period": {"start": "2021-01-01", "end": "2022-12-31"}}
+        ]
+        expected_forename = "Alice Marie"
+        self._run_test(expected_forename) 
+
+    def _run_test(self, expected_forename):
+            """Helper function to run the test"""
+            self.converter = Converter(json.dumps(request_json_data))
+            flat_json = self.converter.runConversion(request_json_data, False, True)
+            self.assertEqual(flat_json[0]["PERSON_FORENAME"], expected_forename)       
+  
+class TestPersonSurNameToFlatJson(unittest.TestCase):
+
+    def test_person_surname_multiple_names_official(self):
+        """Test case where multiple name instances exist, and one has use=official with period covering vaccination date"""
+        request_json_data["contained"][1]["name"] = [
+            {"family": "Doe", "given": ["Johnny"], "use": "nickname", "period": {"start": "2021-01-01", "end": "2022-01-01"}},
+            {"family": "Manny", "given": ["John"], "use": "official", "period": {"start": "2020-01-01", "end": "2021-01-01"}},
+            {"family": "Davis", "given": ["Manny"], "use": "official", "period": {"start": "2021-01-01", "end": "2021-02-09"}},
+            {"family": "Johnny", "given": ["Davis"], "use": "official", "period": {"start": "2021-01-01", "end": "2021-02-09"}},
+        ]
+        expected_forename = "Davis"
+        self._run_test_surname(expected_forename)
+    
+    def test_person_surname_multiple_names_current(self):
+        """Test case where no official name is present, but a name is current at the vaccination date"""
+        request_json_data["contained"][1]["name"] = [
+            {"family": "Manny", "given": ["John"], "period": {"start": "2020-01-01", "end": "2023-01-01"}},
+            {"family": "Doe", "given": ["Johnny"], "use": "nickname"}     
+        ]
+        expected_forename = "Manny"
+        self._run_test_surname(expected_forename)
+
+    def test_person_surname_single_name(self):
+        """Test case where only one name instance exists"""
+        request_json_data["contained"][1]["name"] = [
+            {"family": "Doe", "given": ["Alex"], "use": "nickname"}
+        ]
+        expected_forename = "Doe"
+        self._run_test_surname(expected_forename)
+
+    def test_person_surname_no_official_but_current_not_old(self):
+        """Test case where no official name is present, but a current name with use!=old exists at vaccination date"""
+        request_json_data["contained"][1]["name"] = [
+            {"family": "Doe", "given": ["John"], "use": "old", "period": {"start": "2018-01-01", "end": "2020-12-31"}},
+            {"family": "Manny", "given": ["Chris"], "use": "nickname", "period": {"start": "2021-01-01", "end": "2023-01-01"}}
+        ]
+        expected_forename = "Manny"
+        self._run_test_surname(expected_forename)
+
+    def test_person_surname_fallback_to_first_name(self):
+        """Test case where no names match the previous conditions, fallback to first available name"""
+        request_json_data["contained"][1]["name"] = [
+            {"family": "Doe", "given": ["Elliot"], "use": "nickname"},
+            {"family": "Manny", "given": ["John"], "use": "old", "period": {"start": "2018-01-01", "end": "2020-12-31"}},
+            {"family": "Davis", "given": ["Chris"], "use": "nickname", "period": {"start": "2021-01-01", "end": "2023-01-01"}}
+        ]
+        expected_forename = "Doe"
+        self._run_test_surname(expected_forename)      
+
+    def _run_test_surname(self, expected_forename):
+            """Helper function to run the test"""
+            self.converter = Converter(json.dumps(request_json_data))
+            flat_json = self.converter.runConversion(request_json_data, False, True)
+            print("2")
+            self.assertEqual(flat_json[0]["PERSON_SURNAME"], expected_forename)  
+
+class TestPersonPostalCodeToFlatJson(unittest.TestCase):
+    def test_person_postal_code_single_address(self):
+        """Test case where only one address instance exists"""
+        request_json_data["contained"][1]["address"] = [
+            {"postalCode": "AB12 3CD"}
+        ]
+        expected_postal_code = "AB12 3CD"
+        self._run_postal_code_test(expected_postal_code)
+
+    def test_person_postal_code_ignore_address_without_postal_code(self):
+        """Test case where multiple addresses exist, but one lacks a postalCode"""
+        request_json_data["contained"][1]["address"] = [
+            {"use": "home", "type": "physical"},
+            {"postalCode": "XY99 8ZZ", "use": "home", "type": "physical"}
+        ]
+        expected_postal_code = "XY99 8ZZ"
+        self._run_postal_code_test(expected_postal_code)
+
+    def test_person_postal_code_ignore_non_current_addresses(self):
+        """Test case where multiple addresses exist, but some are not current at the vaccination date"""
+        request_json_data["contained"][1]["address"] = [
+            {"postalCode": "AA11 1AA", "use": "home", "type": "physical", "period": {"start": "2018-01-01", "end": "2020-12-31"}},
+            {"postalCode": "BB22 2BB", "use": "home", "type": "physical", "period": {"start": "2021-01-01", "end": "2023-12-31"}}
+        ]
+        expected_postal_code = "BB22 2BB"
+        self._run_postal_code_test(expected_postal_code)
+
+    def test_person_postal_code_select_home_type_not_postal(self):
+        """Test case where a home address with type!=postal should be selected"""
+        request_json_data["contained"][1]["address"] = [
+            {"postalCode": "CC33 3CC", "use": "old", "type": "physical"},
+            {"postalCode": "DD44 4DD", "use": "home", "type": "physical"},
+            {"postalCode": "EE55 5EE", "use": "temp", "type": "postal"}
+        ]
+        expected_postal_code = "DD44 4DD"
+        self._run_postal_code_test(expected_postal_code)
+
+    def test_person_postal_code_select_first_non_old_type_not_postal(self):
+        """Test case where an address with use!=old and type!=postal should be selected"""
+        request_json_data["contained"][1]["address"] = [
+            {"postalCode": "FF66 6FF", "use": "old", "type": "physical"},
+            {"postalCode": "GG77 7GG", "use": "temp", "type": "physical"},
+            {"postalCode": "HH88 8HH", "use": "old", "type": "postal"}
+        ]
+        expected_postal_code = "GG77 7GG"
+        self._run_postal_code_test(expected_postal_code)
+
+    def test_person_postal_code_fallback_first_non_old(self):
+        """Test case where the first address with use!=old is selected"""
+        request_json_data["contained"][1]["address"] = [
+            {"postalCode": "II99 9II", "use": "old", "type": "postal"},
+            {"postalCode": "JJ10 1JJ", "use": "old", "type": "physical"},
+            {"postalCode": "KK20 2KK", "use": "billing", "type": "postal"}
+        ]
+        expected_postal_code = "KK20 2KK"
+        self._run_postal_code_test(expected_postal_code)
+
+    def test_person_postal_code_default_to_ZZ99_3CZ(self):
+        """Test case where no valid postalCode is found, should default to ZZ99 3CZ"""
+        request_json_data["contained"][1]["address"] = [
+            {"use": "old", "type": "postal"},
+            {"use": "temp", "type": "postal"}
+        ]
+        expected_postal_code = "ZZ99 3CZ"
+        self._run_postal_code_test(expected_postal_code)     
+
+    def _run_postal_code_test(self, expected_postal_code):
+        """Helper function to run the test"""
+        self.converter = Converter(json.dumps(request_json_data))
+        flat_json = self.converter.runConversion(request_json_data, False, True)
+        self.assertEqual(flat_json[0]["PERSON_POSTCODE"], expected_postal_code)
+
+# class TestPersonSiteCodeToFlatJson(unittest.TestCase):
+#     def test_site_code_single_performer(self):
+#         """Test case where only one performer instance exists"""
+#         request_json_data["performer"] = [
+#         {
+#             "actor": {
+#                 "type": "Organization",
+#                 "identifier": {"system": "https://fhir.nhs.uk/Id/ods-organization-code", "value": "B0C4P"},
+#             }
+#         },
+#         {"actor": {"reference": "#Pract1"}},
+#         ]
+#         {"actor": {"value": "OTHER123"}},
+#         expected_site_code = "B0C4P"
+#         self._run_site_code_test(expected_site_code)
+
+#     def test_site_code_multiple_performers_select_type_organization_and_system_nhs(self):
+#         """Test case where multiple performers exist and one has type=organization with system=https://fhir.nhs.uk/Id/ods-organization-code"""
+#         request_json_data["performer"] = [
+#         {
+#             "actor": {
+#                 "identifier": {"system": "https://fhir.nhs.uk/Id/ods-organization-code", "value": "ZXC99"},
+#             }
+#         },
+#         {"actor": {"value": "OTHER123"}},
+#         ]
+#         expected_site_code = "ZXC99"
+#         self._run_site_code_test(expected_site_code)
+
+#     def test_site_code_performer_type_organization_only(self):
+#         """Test case where performer has type=organization but no NHS system"""
+#         request_json_data["performer"] = [
+#             {
+#                 "actor": {"value": "ORG567", "type": "Organization"},
+#             },
+#             {"actor": {"value": "OTHER999"}},
+#         ]
+#         expected_site_code = "ORG567"
+#         self._run_site_code_test(expected_site_code)
+
+#     def test_site_code_fallback_to_first_performer(self):
+#         """Test case where no performers match specific criteria, fallback to first instance"""
+#         request_json_data["performer"] = [
+#             {"actor": {"value": "FALLBACK001"}},
+#             {"actor": {"value": "FALLBACK002"}},
+#         ]
+#         expected_site_code = "FALLBACK001"
+#         self._run_site_code_test(expected_site_code)
+
+#     def test_site_code_no_valid_performer(self):
+#         """Test case where performer list is empty or does not contain valid entries"""
+#         request_json_data["performer"] = []
+#         expected_site_code = ''  # Assuming None or empty string is returned when no valid performer exists
+#         self._run_site_code_test(expected_site_code)
+
+#     def _run_site_code_test(self, expected_site_code):
+#         """Helper function to run the test"""
+#         self.converter = Converter(json.dumps(request_json_data))
+#         flat_json = self.converter.runConversion(request_json_data, False, True)
+#         self.assertEqual(flat_json[0].get("SITE_CODE"), expected_site_code)
+
+class TestPractitionerForeNameToFlatJson(unittest.TestCase):
+    def test_practitioner_forename_multiple_names_official(self):
+        """Test case where multiple name instances exist, and one has use=official with period covering vaccination date"""
+        request_json_data["contained"][0]["name"] = [
+            {"family": "Doe", "given": ["Johnny"], "use": "nickname", "period": {"start": "2021-01-01", "end": "2022-01-01"}},
+            {"family": "Doe", "given": ["John"], "use": "official", "period": {"start": "2020-01-01", "end": "2021-01-01"}},
+            {"family": "Doe", "given": ["Manny"], "use": "official", "period": {"start": "2021-01-01", "end": "2021-02-09"}},
+            {"family": "Doe", "given": ["Davis"], "use": "official", "period": {"start": "2021-01-01", "end": "2021-02-09"}},
+        ]
+        expected_forename = "Manny"
+        self._run_practitioner_test(expected_forename)
+    
+    def test_practitioner_forename_multiple_names_current(self):
+        """Test case where no official name is present, but a name is current at the vaccination date"""
+        request_json_data["contained"][0]["name"] = [
+            {"family": "Doe", "given": ["John"], "period": {"start": "2020-01-01", "end": "2023-01-01"}},
+            {"family": "Doe", "given": ["Johnny"], "use": "nickname"}     
+        ]
+        expected_forename = "John"
+        self._run_practitioner_test(expected_forename)
+
+    def test_Practitioner_forename_single_name(self):
+        """Test case where only one name instance exists"""
+        request_json_data["contained"][0]["name"] = [
+            {"family": "Doe", "given": ["Alex"], "use": "nickname"}
+        ]
+        expected_forename = "Alex"
+        self._run_practitioner_test(expected_forename)
+
+    def test_Practitioner_forename_no_official_but_current_not_old(self):
+        """Test case where no official name is present, but a current name with use!=old exists at vaccination date"""
+        request_json_data["contained"][0]["name"] = [
+            {"family": "Doe", "given": ["John"], "use": "old", "period": {"start": "2018-01-01", "end": "2020-12-31"}},
+            {"family": "Doe", "given": ["Chris"], "use": "nickname", "period": {"start": "2021-01-01", "end": "2023-01-01"}}
+        ]
+        expected_forename = "Chris"
+        self._run_practitioner_test(expected_forename)
+
+    def test_Practitioner_forename_fallback_to_first_name(self):
+        """Test case where no names match the previous conditions, fallback to first available name"""
+        request_json_data["contained"][0]["name"] = [
+            {"family": "Doe", "given": ["Elliot"],"use": "nickname"},
+            {"family": "Doe", "given": ["John"], "use": "old", "period": {"start": "2018-01-01", "end": "2020-12-31"}},
+            {"family": "Doe", "given": ["Chris"], "use": "nickname", "period": {"start": "2021-01-01", "end": "2023-01-01"}}
+        ]
+        expected_forename = "Elliot"
+        self._run_practitioner_test(expected_forename)
+
+    def test_Practitioner_forename_multiple_given_names_concatenation(self):
+        """Test case where the selected name has multiple given names"""
+        request_json_data["contained"][0]["name"] = [
+            {"family": "Doe", "given": ["Chris"], "use": "nickname", "period": {"start": "2021-01-01", "end": "2023-01-01"}},
+            {"family": "Doe", "given": ["Alice", "Marie"], "use": "official", "period": {"start": "2021-01-01", "end": "2022-12-31"}}
+        ]
+        expected_forename = "Alice Marie"
+        self._run_practitioner_test(expected_forename)
+
+    def test_Practitioner_forename_given_missing(self):
+        """Test case where the selected name has multiple given names"""
+        request_json_data["contained"][0]["name"] = [
+            {"family": "Doe", "use": "official", "period": {"start": "2021-01-01", "end": "2022-12-31"}}
+        ]
+        expected_forename = ""
+        self._run_practitioner_test(expected_forename)
+
+    def test_Practitioner_forename_empty(self):
+        """Test case where the selected name has multiple given names"""
+        request_json_data["contained"][0]["name"] = []
+        expected_forename = ""
+        self._run_practitioner_test(expected_forename)    
+
+
+
+    def _run_practitioner_test(self, expected_forename):
+            """Helper function to run the test"""
+            self.converter = Converter(json.dumps(request_json_data))
+            flat_json = self.converter.runConversion(request_json_data, False, True)
+            print("sdc")
+            self.assertEqual(flat_json[0]["PERFORMING_PROFESSIONAL_FORENAME"], expected_forename)
+
+class TestPractitionerSurNameToFlatJson(unittest.TestCase):
+    def test_practitioner_surname_multiple_names_official(self):
+        """Test case where multiple name instances exist, and one has use=official with period covering vaccination date"""
+        request_json_data["contained"][0]["name"] = [
+            {"family": "Doe", "given": ["Johnny"], "use": "nickname", "period": {"start": "2021-01-01", "end": "2022-01-01"}},
+            {"family": "Manny", "given": ["John"], "use": "official", "period": {"start": "2020-01-01", "end": "2021-01-01"}},
+            {"family": "Davis", "given": ["Manny"], "use": "official", "period": {"start": "2021-01-01", "end": "2021-02-09"}},
+            {"family": "Johnny", "given": ["Davis"], "use": "official", "period": {"start": "2021-01-01", "end": "2021-02-09"}},
+        ]
+        expected_forename = "Davis"
+        self._run_test_practitioner_surname(expected_forename)
+    
+    def test_practitioner_surname_multiple_names_current(self):
+        """Test case where no official name is present, but a name is current at the vaccination date"""
+        request_json_data["contained"][0]["name"] = [
+            {"family": "Manny", "given": ["John"], "period": {"start": "2020-01-01", "end": "2023-01-01"}},
+            {"family": "Doe", "given": ["Johnny"], "use": "nickname"}     
+        ]
+        expected_forename = "Manny"
+        self._run_test_practitioner_surname(expected_forename)
+
+    def test_practitioner_surname_single_name(self):
+        """Test case where only one name instance exists"""
+        request_json_data["contained"][0]["name"] = [
+            {"family": "Doe", "given": ["Alex"], "use": "nickname"}
+        ]
+        expected_forename = "Doe"
+        self._run_test_practitioner_surname(expected_forename)
+
+    def test_practitioner_surname_no_official_but_current_not_old(self):
+        """Test case where no official name is present, but a current name with use!=old exists at vaccination date"""
+        request_json_data["contained"][0]["name"] = [
+            {"family": "Doe", "given": ["John"], "use": "old", "period": {"start": "2018-01-01", "end": "2020-12-31"}},
+            {"family": "Manny", "given": ["Chris"], "use": "nickname", "period": {"start": "2021-01-01", "end": "2023-01-01"}}
+        ]
+        expected_forename = "Manny"
+        self._run_test_practitioner_surname(expected_forename)
+
+    def test_practitioner_surname_fallback_to_first_name(self):
+        """Test case where no names match the previous conditions, fallback to first available name"""
+        request_json_data["contained"][0]["name"] = [
+            {"family": "Doe", "given": ["Elliot"], "use": "nickname"},
+            {"family": "Manny", "given": ["John"], "use": "old", "period": {"start": "2018-01-01", "end": "2020-12-31"}},
+            {"family": "Davis", "given": ["Chris"], "use": "nickname", "period": {"start": "2021-01-01", "end": "2023-01-01"}}
+        ]
+        expected_forename = "Doe"
+        self._run_test_practitioner_surname(expected_forename)
+
+    def test_practitioner_surname_empty(self):
+        """Test case where no names match the previous conditions, fallback to first available name"""
+        request_json_data["contained"][0]["name"] = [
+            {"given": ["Elliot"], "use": "nickname"},
+            {"family": "Manny", "given": ["John"], "use": "old", "period": {"start": "2018-01-01", "end": "2020-12-31"}},
+            {"family": "Davis", "given": ["Chris"], "use": "nickname", "period": {"start": "2021-01-01", "end": "2023-01-01"}}
+        ]
+        expected_forename = ""
+        self._run_test_practitioner_surname(expected_forename)
+
+    def test_contained_empty(self):
+        """Test case where no names match the previous conditions, fallback to first available name"""
+        request_json_data["contained"][0]["name"] = []
+        expected_forename = ""
+        self._run_test_practitioner_surname(expected_forename)        
+
+    def _run_test_practitioner_surname(self, expected_forename):
+            """Helper function to run the test"""
+            self.converter = Converter(json.dumps(request_json_data))
+            flat_json = self.converter.runConversion(request_json_data, False, True)
+            print("2")
+            self.assertEqual(flat_json[0]["PERFORMING_PROFESSIONAL_SURNAME"], expected_forename)                        
+              
 
     if __name__ == "__main__":
         unittest.main()
