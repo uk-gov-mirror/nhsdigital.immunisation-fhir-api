@@ -6,7 +6,14 @@ from SchemaParser import SchemaParser
 from ConversionChecker import ConversionChecker
 import ConversionLayout
 from datetime import datetime
-from extractor import extract_person_names,extract_practitioner_names,extract_site_code,get_patient,get_valid_address,get_valid_names
+from extractor import (
+    extract_person_names,
+    extract_practitioner_names,
+    extract_site_code,
+    get_patient,
+    get_valid_address,
+    get_valid_names,
+)
 
 # Converter variables
 FHIRData = ""
@@ -56,8 +63,8 @@ class Converter:
             convertedData = ConversionValidate.convertData(
                 expressionType, expressionRule, FHIRFieldName, conversionValue
             )
-            if FHIRFieldName == "contained|#:":
-                convertedData= self.extract_patient_details(json_data, FlatFieldName)
+            if FHIRFieldName == "contained|#:" or "performer" in FHIRFieldName:
+                convertedData = self.extract_patient_details(json_data, FlatFieldName)
             if convertedData is not None:
                 Converted[FlatFieldName] = convertedData
 
@@ -114,12 +121,14 @@ class Converter:
         patient = get_patient(json_data)
         if not patient:
             return None
-        
+
         person_forename, person_surname = extract_person_names(patient, occurrence_time)
         postal_code = get_valid_address(patient, occurrence_time)
         site_code, site_code_type_uri = extract_site_code(json_data)
-        performing_professional_forename, performing_professional_surname = extract_practitioner_names(json_data, occurrence_time)
-        
+        performing_professional_forename, performing_professional_surname = extract_practitioner_names(
+            json_data, occurrence_time
+        )
+
         field_map = {
             "PERSON_FORENAME": person_forename,
             "PERSON_SURNAME": person_surname,
@@ -127,8 +136,7 @@ class Converter:
             "SITE_CODE": site_code,
             "SITE_CODE_TYPE_URI": site_code_type_uri,
             "PERFORMING_PROFESSIONAL_FORENAME": performing_professional_forename,
-            "PERFORMING_PROFESSIONAL_SURNAME": performing_professional_surname
+            "PERFORMING_PROFESSIONAL_SURNAME": performing_professional_surname,
         }
-        
+
         return field_map.get(FlatFieldName)
-         
