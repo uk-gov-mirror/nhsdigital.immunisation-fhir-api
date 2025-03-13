@@ -6,13 +6,12 @@ from SchemaParser import SchemaParser
 from ConversionChecker import ConversionChecker
 import ConversionLayout
 from datetime import datetime
-from extractor import (
+from Extractor import (
     extract_person_names,
     extract_practitioner_names,
     extract_site_code,
     get_patient,
     get_valid_address,
-    get_valid_names,
 )
 
 # Converter variables
@@ -63,7 +62,7 @@ class Converter:
             convertedData = ConversionValidate.convertData(
                 expressionType, expressionRule, FHIRFieldName, conversionValue
             )
-            if FHIRFieldName == "contained|#:" or "performer" in FHIRFieldName:
+            if "address" in FHIRFieldName or "performer" in FHIRFieldName or "name" in FHIRFieldName:
                 convertedData = self.extract_patient_details(json_data, FlatFieldName)
             if convertedData is not None:
                 Converted[FlatFieldName] = convertedData
@@ -115,28 +114,25 @@ class Converter:
 
     def getErrorRecords(self):
         return ErrorRecords
-
+    
     def extract_patient_details(self, json_data, FlatFieldName):
-        occurrence_time = datetime.strptime(json_data.get("occurrenceDateTime", ""), "%Y-%m-%dT%H:%M:%S%z")
-        patient = get_patient(json_data)
-        if not patient:
-            return None
+        if not hasattr(self, "_cached_values"):
+            self._cached_values = {}
 
-        person_forename, person_surname = extract_person_names(patient, occurrence_time)
-        postal_code = get_valid_address(patient, occurrence_time)
-        site_code, site_code_type_uri = extract_site_code(json_data)
-        performing_professional_forename, performing_professional_surname = extract_practitioner_names(
-            json_data, occurrence_time
-        )
+        if not self._cached_values:
+            occurrence_time = datetime.strptime(json_data.get("occurrenceDateTime", ""), "%Y-%m-%dT%H:%M:%S%z")
+            patient = get_patient(json_data)
+            if not patient:
+                return None
 
-        field_map = {
-            "PERSON_FORENAME": person_forename,
-            "PERSON_SURNAME": person_surname,
-            "PERSON_POSTCODE": postal_code,
-            "SITE_CODE": site_code,
-            "SITE_CODE_TYPE_URI": site_code_type_uri,
-            "PERFORMING_PROFESSIONAL_FORENAME": performing_professional_forename,
-            "PERFORMING_PROFESSIONAL_SURNAME": performing_professional_surname,
-        }
+            self._cached_values = {
+                "PERSON_FORENAME": extract_person_names(patient, occurrence_time)[0],
+                "PERSON_SURNAME": extract_person_names(patient, occurrence_time)[1],
+                "PERSON_POSTCODE": get_valid_address(patient, occurrence_time),
+                "SITE_CODE": extract_site_code(json_data)[0],
+                "SITE_CODE_TYPE_URI": extract_site_code(json_data)[1],
+                "PERFORMING_PROFESSIONAL_FORENAME": extract_practitioner_names(json_data, occurrence_time)[0],
+                "PERFORMING_PROFESSIONAL_SURNAME": extract_practitioner_names(json_data, occurrence_time)[1]
+            }
 
-        return field_map.get(FlatFieldName)
+        return self._cached_values.get(FlatFieldName)

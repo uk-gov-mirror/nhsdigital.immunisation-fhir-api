@@ -381,7 +381,6 @@ class TestPersonSurNameToFlatJson(unittest.TestCase):
         """Helper function to run the test"""
         self.converter = Converter(json.dumps(request_json_data))
         flat_json = self.converter.runConversion(request_json_data, False, True)
-        print("2")
         self.assertEqual(flat_json[0]["PERSON_SURNAME"], expected_forename)
 
 
@@ -416,6 +415,12 @@ class TestPersonPostalCodeToFlatJson(unittest.TestCase):
                 "type": "physical",
                 "period": {"start": "2021-01-01", "end": "2023-12-31"},
             },
+            {
+                "postalCode": "BB22 2BC",
+                "use": "home",
+                "type": "physical",
+                "period": {"start": "2021-01-01", "end": "2024-12-31"},
+            },
         ]
         expected_postal_code = "BB22 2BB"
         self._run_postal_code_test(expected_postal_code)
@@ -425,6 +430,7 @@ class TestPersonPostalCodeToFlatJson(unittest.TestCase):
         request_json_data["contained"][1]["address"] = [
             {"postalCode": "CC33 3CC", "use": "old", "type": "physical"},
             {"postalCode": "DD44 4DD", "use": "home", "type": "physical"},
+            {"postalCode": "DD44 4DP", "use": "home", "type": "physical"},
             {"postalCode": "EE55 5EE", "use": "temp", "type": "postal"},
         ]
         expected_postal_code = "DD44 4DD"
@@ -435,6 +441,7 @@ class TestPersonPostalCodeToFlatJson(unittest.TestCase):
         request_json_data["contained"][1]["address"] = [
             {"postalCode": "FF66 6FF", "use": "old", "type": "physical"},
             {"postalCode": "GG77 7GG", "use": "temp", "type": "physical"},
+            {"postalCode": "GG77 7GI", "use": "temp", "type": "physical"},
             {"postalCode": "HH88 8HH", "use": "old", "type": "postal"},
         ]
         expected_postal_code = "GG77 7GG"
@@ -789,7 +796,6 @@ class TestPractitionerForeNameToFlatJson(unittest.TestCase):
         """Helper function to run the test"""
         self.converter = Converter(json.dumps(request_json_data))
         flat_json = self.converter.runConversion(request_json_data, False, True)
-        print("sdc")
         self.assertEqual(flat_json[0]["PERFORMING_PROFESSIONAL_FORENAME"], expected_forename)
 
 
@@ -904,7 +910,6 @@ class TestPractitionerSurNameToFlatJson(unittest.TestCase):
         """Helper function to run the test"""
         self.converter = Converter(json.dumps(request_json_data))
         flat_json = self.converter.runConversion(request_json_data, False, True)
-        print("2")
         self.assertEqual(flat_json[0]["PERFORMING_PROFESSIONAL_SURNAME"], expected_forename)
 
     if __name__ == "__main__":

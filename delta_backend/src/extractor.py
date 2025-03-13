@@ -1,4 +1,3 @@
-from SchemaParser import SchemaParser
 from datetime import datetime, timezone
 
 

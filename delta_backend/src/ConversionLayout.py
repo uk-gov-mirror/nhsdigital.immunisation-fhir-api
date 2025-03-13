@@ -13,12 +13,12 @@ ConvertLayout = {
             "expression": {"expressionName": "Not Empty", "expressionType": "NOTEMPTY", "expressionRule": ""},
         },
         {
-            "fieldNameFHIR": "contained|#:",
+            "fieldNameFHIR": "contained|#:Patient|name|#:official|given|0",
             "fieldNameFlat": "PERSON_FORENAME",
             "expression": {"expressionName": "Not Empty", "expressionType": "NOTEMPTY", "expressionRule": ""},
         },
         {
-            "fieldNameFHIR": "contained|#:",
+            "fieldNameFHIR": "contained|#:Patient|name|#:official|family",
             "fieldNameFlat": "PERSON_SURNAME",
             "expression": {"expressionName": "Not Empty", "expressionType": "NOTEMPTY", "expressionRule": ""},
         },
@@ -37,7 +37,7 @@ ConvertLayout = {
             "expression": {"expressionName": "Gender Conversion", "expressionType": "GENDER", "expressionRule": ""},
         },
         {
-            "fieldNameFHIR": "contained|#:",
+            "fieldNameFHIR": "contained|#:Patient|address|#:postalCode|postalCode",
             "fieldNameFlat": "PERSON_POSTCODE",
             "expression": {"expressionName": "Defaults to", "expressionType": "DEFAULT", "expressionRule": "ZZ99 3CZ"},
         },
@@ -80,12 +80,12 @@ ConvertLayout = {
             "expression": {"expressionName": "Change To", "expressionType": "CHANGETO", "expressionRule": "update"},
         },
         {
-            "fieldNameFHIR": "contained|#:",
+            "fieldNameFHIR": "contained|#:Practitioner|name|0|given|0",
             "fieldNameFlat": "PERFORMING_PROFESSIONAL_FORENAME",
             "expression": {"expressionName": "Not Empty", "expressionType": "NOTEMPTY", "expressionRule": ""},
         },
         {
-            "fieldNameFHIR": "contained|#:",
+            "fieldNameFHIR": "contained|#:Practitioner|name|0|family",
             "fieldNameFlat": "PERFORMING_PROFESSIONAL_SURNAME",
             "expression": {"expressionName": "Not Empty", "expressionType": "NOTEMPTY", "expressionRule": ""},
         },
