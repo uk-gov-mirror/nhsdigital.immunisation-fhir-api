@@ -1,5 +1,5 @@
 # This is the base layout for converting from FHIR to Flat JSON
-# See the readme for an explanation of how this works
+# See the readme for an explanation of how this works.
 
 ConvertLayout = {
     "id": "7d78e9a6-d859-45d3-bb05-df9c405acbdb",
