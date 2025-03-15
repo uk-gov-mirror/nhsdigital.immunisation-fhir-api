@@ -1,9 +1,6 @@
 import os
-# import logging
+
 from datetime import datetime, timezone
-# logging.basicConfig(level="INFO")
-# logger = logging.getLogger()
-# logger.setLevel("INFO")
 from clients import logger
 
 env_value = os.environ.get("ENV", "internal-dev")
@@ -16,6 +13,7 @@ PRE_VALIDATION_ERROR = "Validation errors: doseQuantity.value must be a number"
 POST_VALIDATION_ERROR = "Validation errors: contained[?(@.resourceType=='Patient')].name[0].given is a mandatory field"
 DUPLICATE = "The provided identifier:"
 ACK_PREFIX = "ack/"
+HEADER_RESPONSE_CODE_COLUMN = "HEADER_RESPONSE_CODE"
 FILE_NAME_VAL_ERROR = "Infrastructure Level Response Value - Processing Error"
 CONFIG_BUCKET = "imms-internal-dev-supplier-config"
 PERMISSIONS_CONFIG_FILE_KEY = "permissions_config.json"
