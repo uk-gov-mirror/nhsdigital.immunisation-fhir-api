@@ -50,9 +50,10 @@ poetry install
 7. Create a .env file in the backend folder. Note the variables might change in the future, but it's been copied from the existing README.md from backend. These env variables will be loaded automatically when using direnv
 
 ```
-AWS_PROFILE=local
-DYNAMODB_TABLE_NAME=imms-default-imms-events 
-IMMUNIZATION_ENV=local 
+AWS_PROFILE={your-profile}
+DYNAMODB_TABLE_NAME=imms-{environment}-imms-events
+IMMUNIZATION_ENV={environment}
+SPLUNK_FIREHOSE_NAME=immunisation-fhir-api-{environment}-splunk-firehose
 ```
 
 8. Configure direnv by creating a .envrc file in the backend folder. This points direnv to the .venv created by poetry and loads env variables specified in the .env file
@@ -72,7 +73,7 @@ direnv: export +AWS_PROFILE +DYNAMODB_TABLE_NAME +IMMUNIZATION_ENV +VIRTUAL_ENV 
 Test if environment variables have been loaded into shell: `echo $IMMUNIZATION_ENV`. This should print `local`
 
 
-10. Run `make test` to run unit tests. At this point aprox 11 test would fail out of 241 tests. (To investigate)
+10. Run `make test` to run unit tests. There should be aprox 380 tests that ran successfully
 
 
 ## Devtools - Localstack
