@@ -5,6 +5,9 @@ parameters:
     default: true
   - name: 'aws_account_type'
     type: string
+  - name: tf_dir
+    type: string
+    default: "terraform"
 
 steps:
   - ${{ if parameters.is_ptl }}:
@@ -58,7 +61,8 @@ steps:
         echo Apigee environment: $APIGEE_ENVIRONMENT
         echo pr_no: $pr_no
 
-          cd terraform
+        echo "Moving to dir: ${{ parameters.tf_dir }}"
+        cd ${{ parameters.tf_dir }}
 
         make init
         make apply aws_account_no=${aws_account_no} environment=$workspace
