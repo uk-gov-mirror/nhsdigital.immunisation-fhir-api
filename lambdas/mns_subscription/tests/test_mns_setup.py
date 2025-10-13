@@ -4,7 +4,6 @@ from mns_setup import get_mns_service
 
 
 class TestGetMnsService(unittest.TestCase):
-
     @patch("mns_setup.boto3.client")
     @patch("mns_setup.AppRestrictedAuth")
     @patch("mns_setup.MnsService")

@@ -120,7 +120,6 @@ class GenericTearDown:
         sqs_client=None,
         dynamodb_client=None,
     ):
-
         if s3_client:
             for bucket_name in [
                 BucketNames.SOURCE,

@@ -4,7 +4,6 @@ from common.s3_event import S3Event
 
 
 class TestS3Event(unittest.TestCase):
-
     def setUp(self):
         """Set up test fixtures"""
         self.s3_record_dict = {

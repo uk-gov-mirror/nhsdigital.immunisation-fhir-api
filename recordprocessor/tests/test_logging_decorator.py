@@ -203,7 +203,6 @@ class TestLoggingDecorator(unittest.TestCase):
             expected_error_message,
         ) in test_cases:
             with self.subTest(expected_error_message):
-
                 s3_client.put_object(
                     Bucket=BucketNames.SOURCE,
                     Key=MOCK_FILE_DETAILS.file_key,

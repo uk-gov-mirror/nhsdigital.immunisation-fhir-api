@@ -60,7 +60,6 @@ class GenericSetUp:
         kinesis_client=None,
         dynamo_db_client=None,
     ):
-
         if s3_client:
             for bucket_name in [
                 BucketNames.SOURCE,
@@ -144,7 +143,6 @@ class GenericTearDown:
         kinesis_client=None,
         dynamo_db_client=None,
     ):
-
         if s3_client:
             for bucket_name in [BucketNames.SOURCE, BucketNames.DESTINATION]:
                 for obj in s3_client.list_objects_v2(Bucket=bucket_name).get("Contents", []):

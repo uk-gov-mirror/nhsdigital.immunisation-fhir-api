@@ -9,7 +9,6 @@ with patch("common.log_decorator.logging_decorator") as mock_decorator:
 
 
 class TestIdSyncHandler(unittest.TestCase):
-
     def setUp(self):
         """Set up all patches and test fixtures"""
         # Patch all dependencies

@@ -3,7 +3,6 @@ from common.aws_lambda_event import AwsLambdaEvent, AwsEventType
 
 
 class TestAwsLambdaEvent(unittest.TestCase):
-
     def setUp(self):
         """Set up test fixtures"""
         self.sqs_record_dict = {

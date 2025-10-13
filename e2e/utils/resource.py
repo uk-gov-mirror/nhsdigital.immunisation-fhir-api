@@ -169,7 +169,4 @@ def delete_imms_records(identifiers: list[str]) -> None:
             failure_count = total  # Assume all failed if batch writer fails
 
         if failure_count > 0:
-            print(
-                f"[teardown warning] Deleted {success_count} records out of {total}, "
-                f"failed to delete {failure_count}"
-            )
+            print(f"[teardown warning] Deleted {success_count} records out of {total}, failed to delete {failure_count}")

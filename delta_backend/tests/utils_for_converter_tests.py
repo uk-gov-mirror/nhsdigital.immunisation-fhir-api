@@ -15,7 +15,6 @@ class RecordConfig:
 
 
 class ValuesForTests:
-
     MOCK_ENVIRONMENT_DICT = {
         "DYNAMODB_TABLE_NAME": "immunisation-batch-internal-dev-imms-test-table",
         "ENVIRONMENT": "internal-dev-test",
@@ -346,7 +345,6 @@ class ValuesForTests:
 
 
 class ErrorValuesForTests:
-
     json_dob_error = {
         "resourceType": "Immunization",
         "contained": [

@@ -11,7 +11,6 @@ from utils.resource import generate_imms_resource, generate_filtered_imms_resour
 
 
 class TestSearchImmunizationByIdentifier(ImmunizationBaseTest):
-
     def store_records(self, *resources):
         ids = []
         for res in resources:
@@ -68,7 +67,6 @@ class TestSearchImmunizationByIdentifier(ImmunizationBaseTest):
         """
         for imms_api in self.imms_apis:
             with self.subTest(imms_api):
-
                 stored_imms_resource = generate_imms_resource()
                 imms_identifier_value = stored_imms_resource["identifier"][0]["value"]
                 imms_id = self.store_records(stored_imms_resource)

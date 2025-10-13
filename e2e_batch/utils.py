@@ -313,9 +313,9 @@ def validate_row_count(desc, source_file_name, ack_file_name):
     """
     source_file_row_count = fetch_row_count(SOURCE_BUCKET, f"archive/{source_file_name}")
     ack_file_row_count = fetch_row_count(ACK_BUCKET, ack_file_name)
-    assert (
-        source_file_row_count == ack_file_row_count
-    ), f"{desc}. Row count mismatch: Input ({source_file_row_count}) vs Ack ({ack_file_row_count})"
+    assert source_file_row_count == ack_file_row_count, (
+        f"{desc}. Row count mismatch: Input ({source_file_row_count}) vs Ack ({ack_file_row_count})"
+    )
 
 
 def fetch_row_count(bucket, file_name):
@@ -430,7 +430,6 @@ def verify_final_ack_file(file_key):
 
 
 def delete_filename_from_audit_table(filename) -> bool:
-
     # 1. Query the GSI to get all items with the given filename
     try:
         response = audit_table.query(
@@ -449,7 +448,6 @@ def delete_filename_from_audit_table(filename) -> bool:
 
 
 def delete_filename_from_events_table(identifier) -> bool:
-
     # 1. Query the GSI to get all items with the given filename
     try:
         identifier_pk = f"{RAVS_URI}#{identifier}"

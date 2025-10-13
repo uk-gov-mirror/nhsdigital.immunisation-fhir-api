@@ -20,7 +20,6 @@ from utils.resource import generate_imms_resource
 
 @unittest.skip("Skipping this entire test suite for now")
 class TestApplicationRestrictedAuthorization(ImmunizationBaseTest):
-
     my_app: ApigeeApp
     my_imms_api: ImmunisationApi
 

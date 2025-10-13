@@ -8,7 +8,6 @@ from utils.resource import generate_imms_resource, generate_filtered_imms_resour
 
 
 class TestGetImmunization(ImmunizationBaseTest):
-
     def test_get_imms(self):
         """it should get a FHIR Immunization resource"""
         for imms_api in self.imms_apis:

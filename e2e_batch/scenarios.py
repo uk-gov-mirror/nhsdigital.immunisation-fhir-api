@@ -111,14 +111,12 @@ class TestCase:
             if operation_outcome and "OPERATION_OUTCOME" in row:
                 row_OPERATION_OUTCOME = row["OPERATION_OUTCOME"].strip()
                 assert row_OPERATION_OUTCOME.startswith(operation_outcome), (
-                    f"{desc}.Row {i} expected OPERATION_OUTCOME '{operation_outcome}', "
-                    f"but got '{row_OPERATION_OUTCOME}'"
+                    f"{desc}.Row {i} expected OPERATION_OUTCOME '{operation_outcome}', but got '{row_OPERATION_OUTCOME}'"
                 )
             elif row_HEADER_RESPONSE_CODE == "Fatal Error":
                 validate_fatal_error(desc, row, i, operation_outcome)
 
     def generate_csv_file(self):
-
         self.file_name = self.get_file_name(self.vax, self.ods, self.version)
         logger.info(f'Test "{self.name}" File {self.file_name}')
         data = []

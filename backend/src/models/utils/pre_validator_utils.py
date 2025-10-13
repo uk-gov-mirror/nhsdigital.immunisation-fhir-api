@@ -6,7 +6,6 @@ from .generic_utils import nhs_number_mod11_check, is_valid_simple_snomed
 
 
 class PreValidation:
-
     @staticmethod
     def for_string(
         field_value: str,

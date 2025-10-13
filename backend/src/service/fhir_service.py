@@ -54,7 +54,6 @@ def get_service_url(
     service_env: str = IMMUNIZATION_ENV,
     service_base_path: str = IMMUNIZATION_BASE_PATH,
 ) -> str:
-
     if not service_base_path:
         service_base_path = "immunisation-fhir-api/FHIR/R4"
 

@@ -73,7 +73,6 @@ def complete_batch_file_process_logging_decorator(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-
         base_log_data = {
             "function_name": f"{PREFIX}_{func.__name__}",
             "date_time": str(datetime.now()),
@@ -101,7 +100,6 @@ def ack_lambda_handler_logging_decorator(func):
 
     @wraps(func)
     def wrapper(event, context, *args, **kwargs):
-
         base_log_data = {
             "function_name": f"{PREFIX}_{func.__name__}",
             "date_time": str(datetime.now()),

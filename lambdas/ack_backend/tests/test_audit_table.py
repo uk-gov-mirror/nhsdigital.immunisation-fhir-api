@@ -5,7 +5,6 @@ from common.models.errors import UnhandledAuditTableError
 
 
 class TestAuditTable(unittest.TestCase):
-
     def setUp(self):
         self.logger_patcher = patch("audit_table.logger")
         self.mock_logger = self.logger_patcher.start()

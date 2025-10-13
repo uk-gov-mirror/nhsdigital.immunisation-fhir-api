@@ -10,7 +10,6 @@ from utils.get_sqs_url import get_queue_url
 
 
 class TestSQS(unittest.TestCase):
-
     def setUp(self):
         # Get SQS queue url
         self.queue_name = os.environ["AWS_SQS_QUEUE_NAME"]

@@ -10,7 +10,6 @@ class AwsEventType(Enum):
 
 
 class AwsLambdaEvent:
-
     def __init__(self, event: Dict[str, Any]):
         self.event_source = None
         self.event_type = AwsEventType.UNKNOWN

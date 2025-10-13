@@ -27,7 +27,6 @@ def get_target_disease_codes(immunization: dict):
 
     # For each item in the target disease list, extract the snomed code
     for i, element in enumerate(target_disease):
-
         try:
             code = [x["code"] for x in element["coding"] if x.get("system") == Urls.snomed][0]
         except (KeyError, IndexError) as error:

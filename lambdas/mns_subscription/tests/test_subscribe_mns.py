@@ -4,7 +4,6 @@ from subscribe_mns import run_subscription
 
 
 class TestRunSubscription(unittest.TestCase):
-
     @patch("subscribe_mns.get_mns_service")  # patch where it's imported/used!
     def test_run_subscription_success(self, mock_get_mns_service):
         mock_mns_instance = MagicMock()

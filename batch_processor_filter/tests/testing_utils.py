@@ -32,7 +32,7 @@ def add_entry_to_mock_table(
     """Add an entry to the audit table"""
     audit_table_entry = {
         "message_id": {"S": batch_file_created_event.get("message_id")},
-        "queue_name": {"S": f'{batch_file_created_event["supplier"]}_{batch_file_created_event["vaccine_type"]}'},
+        "queue_name": {"S": f"{batch_file_created_event['supplier']}_{batch_file_created_event['vaccine_type']}"},
         "filename": {"S": batch_file_created_event.get("filename")},
         "status": {"S": status},
     }

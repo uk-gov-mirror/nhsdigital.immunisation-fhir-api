@@ -184,7 +184,7 @@ class TestAckProcessor(unittest.TestCase):
         test_cases = [
             {
                 "description": "Multiple messages: all successful",
-                "messages": [{"row_id": f"row^{i+1}"} for i in range(10)],
+                "messages": [{"row_id": f"row^{i + 1}"} for i in range(10)],
             },
             {
                 "description": "Multiple messages: all with diagnostics (failure messages)",

@@ -8,7 +8,6 @@ from common.mappings import ConversionFieldName
 
 
 class TestDoseAmountTypeUriToFlatJson(unittest.TestCase):
-
     def setUp(self):
         self.request_json_data = copy.deepcopy(ValuesForTests.json_data)
 

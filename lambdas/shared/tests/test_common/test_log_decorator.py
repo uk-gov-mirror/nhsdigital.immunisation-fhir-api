@@ -11,7 +11,6 @@ from common.log_decorator import (
 
 
 class TestLogDecorator(unittest.TestCase):
-
     def setUp(self):
         self.test_stream = "test-stream"
         self.test_prefix = "test"

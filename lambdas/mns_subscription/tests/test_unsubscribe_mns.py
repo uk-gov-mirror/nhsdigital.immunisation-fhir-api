@@ -4,7 +4,6 @@ from unsubscribe_mns import run_unsubscribe
 
 
 class TestRunUnsubscribe(unittest.TestCase):
-
     @patch("unsubscribe_mns.get_mns_service")
     def test_run_unsubscribe_success(self, mock_get_mns_service):
         # Arrange

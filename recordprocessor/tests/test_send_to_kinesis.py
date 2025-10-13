@@ -22,7 +22,6 @@ kinesis_client = boto3_client("kinesis", region_name=REGION_NAME)
 
 @mock_kinesis
 class TestSendToKinesis(unittest.TestCase):
-
     def setUp(self) -> None:
         GenericSetUp(None, None, kinesis_client)
 
@@ -31,7 +30,6 @@ class TestSendToKinesis(unittest.TestCase):
 
     @patch.dict("os.environ", MOCK_ENVIRONMENT_DICT)
     def test_send_to_kinesis_success(self):
-
         kinesis_client.return_value = {"ResponseMetadata": {"HTTPStatusCode": 200}}
 
         # arrange required parameters

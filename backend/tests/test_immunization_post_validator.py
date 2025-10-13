@@ -570,9 +570,9 @@ class TestImmunizationModelPostValidationRules(unittest.TestCase):
         self.mock_redis_client.hget.side_effect = None
         self.mock_redis_client.hget.return_value = "COVID19"
         invalid_json_data = deepcopy(self.completed_json_data["COVID19"])
-        invalid_json_data["extension"][0]["valueCodeableConcept"]["coding"][0][
-            "system"
-        ] = "https://xyz/Extension-UKCore-VaccinationProcedure"
+        invalid_json_data["extension"][0]["valueCodeableConcept"]["coding"][0]["system"] = (
+            "https://xyz/Extension-UKCore-VaccinationProcedure"
+        )
 
         with self.assertRaises(Exception) as error:
             self.validator.validate(invalid_json_data)

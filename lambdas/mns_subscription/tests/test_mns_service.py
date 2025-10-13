@@ -29,7 +29,6 @@ class TestMnsService(unittest.TestCase):
     @patch("mns_service.requests.post")
     @patch("mns_service.requests.get")
     def test_successful_subscription(self, mock_get, mock_post):
-
         # Arrange GET to return no subscription found
         mock_get_response = MagicMock()
         mock_get_response.status_code = 200

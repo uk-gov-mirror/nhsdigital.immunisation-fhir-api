@@ -443,7 +443,6 @@ class TestUnexpectedBucket(TestCase):
 
 
 class TestMainEntryPoint(TestCase):
-
     def test_run_local_constructs_event_and_calls_lambda_handler(self):
         test_args = [
             "file_name_processor.py",

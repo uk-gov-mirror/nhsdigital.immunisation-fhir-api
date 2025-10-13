@@ -123,7 +123,7 @@ class TestLambdaHandler(TestCase):
 
         self.assertEqual(
             str(exc.exception),
-            "An error occurred (NoSuchKey) when calling the GetObject " "operation: The specified key does not exist.",
+            "An error occurred (NoSuchKey) when calling the GetObject operation: The specified key does not exist.",
         )
         archived_object = s3_client.get_object(Bucket=self.mock_source_bucket, Key=f"archive/{filename}")
         self.assertIsNotNone(archived_object)
@@ -287,7 +287,7 @@ class TestLambdaHandler(TestCase):
         )
 
         expected_success_log_message = (
-            f"File forwarded for processing by ECS. Filename: " f"{self.default_batch_file_event['filename']}"
+            f"File forwarded for processing by ECS. Filename: {self.default_batch_file_event['filename']}"
         )
         self.mock_logger.info.assert_has_calls(
             [

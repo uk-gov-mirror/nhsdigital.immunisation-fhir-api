@@ -149,10 +149,9 @@ class TestRecordProcessor(unittest.TestCase):
 
         for test_name, index, expected_kinesis_data, expect_success in test_cases:
             with self.subTest(test_name):
-
                 kinesis_record = kinesis_records[index]
                 self.assertEqual(kinesis_record["PartitionKey"], mock_rsv_emis_file.queue_name)
-                self.assertEqual(kinesis_record["SequenceNumber"], f"{index+1}")
+                self.assertEqual(kinesis_record["SequenceNumber"], f"{index + 1}")
 
                 # Ensure that arrival times are sequential
                 approximate_arrival_timestamp = kinesis_record["ApproximateArrivalTimestamp"]
@@ -164,7 +163,7 @@ class TestRecordProcessor(unittest.TestCase):
 
                 kinesis_data = json.loads(kinesis_record["Data"].decode("utf-8"), parse_float=Decimal)
                 expected_kinesis_data = {
-                    "row_id": f"{mock_rsv_emis_file.message_id}^{index+1}",
+                    "row_id": f"{mock_rsv_emis_file.message_id}^{index + 1}",
                     "file_key": mock_rsv_emis_file.file_key,
                     "supplier": mock_rsv_emis_file.supplier,
                     "vax_type": mock_rsv_emis_file.vaccine_type,
@@ -493,7 +492,6 @@ class TestRecordProcessor(unittest.TestCase):
             ),
         ]
         for description, file_content in test_cases:
-
             with self.subTest(description=description):
                 self.mock_batch_processor_logger.reset_mock()
                 test_file = mock_rsv_emis_file

@@ -9,7 +9,6 @@ from tests.utils_for_recordprocessor_tests.utils_for_recordprocessor_tests impor
 
 
 class TestProcessorEdgeCases(unittest.TestCase):
-
     def setUp(self):
         self.mock_logger_info = create_patch("logging.Logger.info")
         self.mock_logger_warning = create_patch("logging.Logger.warning")

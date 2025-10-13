@@ -26,7 +26,6 @@ def lambda_handler(event, _):
     total_ack_rows_processed = 0
 
     for i, record in enumerate(event["Records"]):
-
         try:
             incoming_message_body = json.loads(record["body"])
         except Exception as body_json_error:

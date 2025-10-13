@@ -5,7 +5,6 @@ from exceptions.id_sync_exception import IdSyncException
 
 
 class TestGetPdsPatientDetails(unittest.TestCase):
-
     def setUp(self):
         """Set up test fixtures and mocks"""
         self.test_patient_id = "9912003888"

@@ -4,7 +4,6 @@ from redis_cacher import RedisCacher
 
 
 class TestRedisCacher(unittest.TestCase):
-
     def setUp(self):
         self.mock_s3_reader = patch("redis_cacher.S3Reader").start()
         self.mock_transform_map = patch("redis_cacher.transform_map").start()

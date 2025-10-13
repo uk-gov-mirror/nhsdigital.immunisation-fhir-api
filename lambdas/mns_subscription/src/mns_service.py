@@ -48,7 +48,6 @@ class MnsService:
         logging.info(f"Using SQS ARN for subscription: {SQS_ARN}")
 
     def subscribe_notification(self) -> dict | None:
-
         response = requests.post(
             MNS_URL,
             headers=self.request_headers,

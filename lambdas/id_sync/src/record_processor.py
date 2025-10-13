@@ -12,7 +12,6 @@ import ast
 
 
 def process_record(event_record: Dict[str, Any]) -> Dict[str, Any]:
-
     logger.info("process_record. Processing record: %s", event_record)
     body_text = event_record.get("body", "")
 

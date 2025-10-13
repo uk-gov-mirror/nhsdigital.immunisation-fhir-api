@@ -10,7 +10,6 @@ from utils.resource import generate_imms_resource
 
 
 class TestSearchImmunizationByIdentifier(ImmunizationBaseTest):
-
     def store_records(self, *resources):
         ids = []
         for res in resources:

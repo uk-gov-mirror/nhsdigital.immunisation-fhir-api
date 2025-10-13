@@ -4,7 +4,6 @@ from common.aws_dynamodb import get_dynamodb_table
 
 
 class TestGetIedsTable(unittest.TestCase):
-
     AWS_REGION = "eu-west-2"  # Add this missing constant
 
     def setUp(self):

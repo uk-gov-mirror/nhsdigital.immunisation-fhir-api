@@ -5,7 +5,6 @@ import importlib
 
 
 class TestRedisClient(unittest.TestCase):
-
     REDIS_HOST = "mock-redis-host"
     REDIS_PORT = 6379
 

@@ -214,7 +214,6 @@ class TestConvertToFlatJson(unittest.TestCase):
 
         for test_case in expected_action_flags:
             with self.subTest(test_case["Operation"]):
-
                 event = self.get_event(operation=test_case["Operation"])
 
                 response = handler(event, None)

@@ -94,7 +94,6 @@ class RecordAttributes:
 
 
 class ImmunizationBatchRepository:
-
     def create_immunization(
         self,
         immunization: any,

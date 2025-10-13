@@ -30,7 +30,6 @@ with patch.dict("os.environ", ForwarderValues.MOCK_ENVIRONMENT_DICT):
 @mock_aws
 @patch.dict(os.environ, ForwarderValues.MOCK_ENVIRONMENT_DICT)
 class TestForwardLambdaHandler(TestCase):
-
     def setUp(self):
         """Set up dynamodb table test values to be used for the tests"""
         self.dynamodb_resource = boto3_resource("dynamodb", "eu-west-2")

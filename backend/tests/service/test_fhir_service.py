@@ -51,7 +51,6 @@ class TestFhirServiceBase(unittest.TestCase):
 
 
 class TestServiceUrl(unittest.TestCase):
-
     def setUp(self):
         self.logger_info_patcher = patch("logging.Logger.info")
         self.mock_logger_info = self.logger_info_patcher.start()
@@ -379,11 +378,14 @@ class TestGetImmunizationIdentifier(unittest.TestCase):
 
         mock_resource = create_covid_19_immunization_dict(identifier)
         self.authoriser.authorise.return_value = True
-        self.imms_repo.get_immunization_by_identifier.return_value = {
-            "resource": mock_resource,
-            "id": imms_id,
-            "version": 1,
-        }, "covid19"
+        self.imms_repo.get_immunization_by_identifier.return_value = (
+            {
+                "resource": mock_resource,
+                "id": imms_id,
+                "version": 1,
+            },
+            "covid19",
+        )
 
         # When
         service_resp = self.fhir_service.get_immunization_by_identifier(
@@ -409,10 +411,13 @@ class TestGetImmunizationIdentifier(unittest.TestCase):
         identifier = "test"
         element = "id,mEta,DDD"
         self.authoriser.authorise.return_value = False
-        self.imms_repo.get_immunization_by_identifier.return_value = {
-            "id": "foo",
-            "version": 1,
-        }, "covid19"
+        self.imms_repo.get_immunization_by_identifier.return_value = (
+            {
+                "id": "foo",
+                "version": 1,
+            },
+            "covid19",
+        )
 
         with self.assertRaises(UnauthorizedVaxError):
             # When
