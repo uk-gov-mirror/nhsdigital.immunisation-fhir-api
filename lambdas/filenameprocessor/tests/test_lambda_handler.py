@@ -200,7 +200,7 @@ class TestLambdaHandlerDataSource(TestCase):
         Tests that for a new file, which passes validation:
         * The file is added to the audit table with a status of 'processing'
         * The message is sent to SQS
-        * The make_and_upload_the_ack_file method is not called
+        * The make_and_upload_ack_file method is not called
         """
         test_cases = [MockFileDetails.emis_flu, MockFileDetails.ravs_rsv_1]
         for file_details in test_cases:

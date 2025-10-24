@@ -25,7 +25,7 @@ from constants import (
 )
 from file_validation import is_file_in_directory_root, validate_file_key
 from logging_decorator import logging_decorator
-from make_and_upload_ack_file import make_and_upload_the_ack_file
+from common.make_and_upload_ack_file import make_and_upload_ack_file
 from send_sqs_message import make_and_send_sqs_message
 from supplier_permissions import validate_vaccine_type_permissions
 from utils_for_filenameprocessor import get_creation_and_expiry_times, move_file
@@ -133,7 +133,7 @@ def handle_record(record) -> dict:
 
         # Create ack file
         message_delivered = False
-        make_and_upload_the_ack_file(message_id, file_key, message_delivered, created_at_formatted_string)
+        make_and_upload_ack_file(message_id, file_key, message_delivered, created_at_formatted_string)
 
         # Move file to archive
         move_file(bucket_name, file_key, f"archive/{file_key}")

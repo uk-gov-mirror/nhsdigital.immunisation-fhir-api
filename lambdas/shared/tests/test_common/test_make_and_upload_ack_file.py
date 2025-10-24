@@ -5,7 +5,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from boto3 import client as boto3_client
-from moto import mock_s3
+from moto import mock_aws
 
 from tests.utils_for_tests.mock_environment_variables import (
     MOCK_ENVIRONMENT_DICT,
@@ -19,9 +19,9 @@ from tests.utils_for_tests.values_for_tests import MockFileDetails
 # Ensure environment variables are mocked before importing from src files
 with patch.dict("os.environ", MOCK_ENVIRONMENT_DICT):
     from common.clients import REGION_NAME
-    from make_and_upload_ack_file import (
-        make_and_upload_the_ack_file,
-        make_the_ack_data,
+    from common.make_and_upload_ack_file import (
+        make_and_upload_ack_file,
+        make_ack_data,
         upload_ack_file,
     )
 
@@ -48,26 +48,20 @@ EXPECTED_ACK_DATA = {
 }
 
 
-@mock_s3
+@mock_aws
 @patch.dict("os.environ", MOCK_ENVIRONMENT_DICT)
 class TestMakeAndUploadAckFile(TestCase):
     """Tests for make_and_upload_ack_file functions"""
-
-    def setUp(self):
-        """Set up the bucket for the ack files"""
-        s3_client.create_bucket(
-            Bucket=BucketNames.DESTINATION,
-            CreateBucketConfiguration={"LocationConstraint": REGION_NAME},
-        )
 
     def test_make_ack_data(self):
         "Tests make_ack_data makes correct ack data based on the input args"
         # CASE: message not delivered (this is the only case which creates an ack file for filenameprocessor)
         self.assertEqual(
-            make_the_ack_data(
+            make_ack_data(
                 message_id=FILE_DETAILS.message_id,
                 message_delivered=False,
                 created_at_formatted_string=FILE_DETAILS.created_at_formatted_string,
+                validation_passed=False
             ),
             EXPECTED_ACK_DATA,
         )
@@ -88,7 +82,7 @@ class TestMakeAndUploadAckFile(TestCase):
 
     def test_make_and_upload_ack_file(self):
         """Test that make_and_upload_ack_file uploads an ack file containing the correct values"""
-        make_and_upload_the_ack_file(
+        make_and_upload_ack_file(
             message_id=FILE_DETAILS.message_id,
             file_key=FILE_DETAILS.file_key,
             message_delivered=False,

@@ -7,21 +7,25 @@ from io import BytesIO, StringIO
 from common.clients import s3_client
 
 
-def make_the_ack_data(message_id: str, message_delivered: bool, created_at_formatted_string: str) -> dict:
-    """
-    Returns a dictionary of ack data based on the input values.
-    Dictionary keys are the ack file headers, dictionary values are the values for the ack file row
-    """
+def make_ack_data(
+    message_id: str,
+    message_delivered: bool,
+    created_at_formatted_string,
+    validation_passed: bool = False,
+) -> dict:
+    """Returns a dictionary of ack data based on the input values. Dictionary keys are the ack file headers,
+    dictionary values are the values for the ack file row"""
+    success_display = "Success"
     failure_display = "Infrastructure Level Response Value - Processing Error"
     return {
         "MESSAGE_HEADER_ID": message_id,
-        "HEADER_RESPONSE_CODE": "Failure",
-        "ISSUE_SEVERITY": "Fatal",
-        "ISSUE_CODE": "Fatal Error",
-        "ISSUE_DETAILS_CODE": "10001",
+        "HEADER_RESPONSE_CODE": ("Success" if (validation_passed and message_delivered) else "Failure"),
+        "ISSUE_SEVERITY": "Information" if validation_passed else "Fatal",
+        "ISSUE_CODE": "OK" if validation_passed else "Fatal Error",
+        "ISSUE_DETAILS_CODE": "20013" if validation_passed else "10001",
         "RESPONSE_TYPE": "Technical",
-        "RESPONSE_CODE": "10002",
-        "RESPONSE_DISPLAY": failure_display,
+        "RESPONSE_CODE": ("20013" if (validation_passed and message_delivered) else "10002"),
+        "RESPONSE_DISPLAY": (success_display if (validation_passed and message_delivered) else failure_display),
         "RECEIVED_TIME": created_at_formatted_string,
         "MAILBOX_FROM": "",  # TODO: Leave blank for DPS, add mailbox if from mesh mailbox
         "LOCAL_ID": "",  # TODO: Leave blank for DPS, add from ctl file if data picked up from MESH mailbox
@@ -29,7 +33,11 @@ def make_the_ack_data(message_id: str, message_delivered: bool, created_at_forma
     }
 
 
-def upload_ack_file(file_key: str, ack_data: dict, created_at_formatted_string: str) -> None:
+def upload_ack_file(
+    file_key: str,
+    ack_data: dict,
+    created_at_formatted_string: str,
+) -> None:
     """Formats the ack data into a csv file and uploads it to the ack bucket"""
     ack_filename = "ack/" + file_key.replace(".csv", f"_InfAck_{created_at_formatted_string}.csv")
 
@@ -46,12 +54,17 @@ def upload_ack_file(file_key: str, ack_data: dict, created_at_formatted_string: 
     s3_client.upload_fileobj(csv_bytes, ack_bucket_name, ack_filename)
 
 
-def make_and_upload_the_ack_file(
+def make_and_upload_ack_file(
     message_id: str,
     file_key: str,
     message_delivered: bool,
     created_at_formatted_string: str,
 ) -> None:
     """Creates the ack file and uploads it to the S3 ack bucket"""
-    ack_data = make_the_ack_data(message_id, message_delivered, created_at_formatted_string)
+    ack_data = make_ack_data(
+        message_id, 
+        message_delivered, 
+        created_at_formatted_string, 
+        validation_passed=False
+    )
     upload_ack_file(file_key, ack_data, created_at_formatted_string)
